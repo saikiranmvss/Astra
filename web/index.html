@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ASTRA - Vedic astrology, calculated</title>
+  <meta name="description" content="Birth chart, dashas, vargas, yogas, transits, matching, Panchanga, festivals, muhurta and eclipses computed from NASA JPL DE440 with IAU 2006/2000A and Lahiri ayanamsa. No AI, no copied panchangam.">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <meta name="theme-color" content="#0b1030">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Cormorant+Garamond:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="g-logo" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#c7b8ff"/><stop offset="1" stop-color="#7c6cff"/></linearGradient>
+  </defs>
+  <symbol id="i-logo" viewBox="0 0 32 32"><circle cx="16" cy="16" r="5.2" fill="url(#g-logo)"/><ellipse cx="16" cy="16" rx="13.5" ry="5.6" fill="none" stroke="url(#g-logo)" stroke-width="1.6" transform="rotate(-28 16 16)"/><circle cx="27" cy="9.6" r="1.8" fill="#e9e5ff"/><path d="M16 1.5v3M16 27.5v3" stroke="#c7b8ff" stroke-width="1.2" stroke-linecap="round"/></symbol>
+  <symbol id="i-dashboard" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 3 21 12 12 21 3 12Z"/><path d="M3 3l18 18M21 3 3 21" opacity=".55"/></symbol>
+  <symbol id="i-dashas" viewBox="0 0 24 24"><path d="M5 22h14M5 2h14M17 22v-4.2a2 2 0 0 0-.6-1.4L12 12l-4.4 4.4a2 2 0 0 0-.6 1.4V22M7 2v4.2a2 2 0 0 0 .6 1.4L12 12l4.4-4.4a2 2 0 0 0 .6-1.4V2"/></symbol>
+  <symbol id="i-transits" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><ellipse cx="12" cy="12" rx="10" ry="4.6" transform="rotate(-30 12 12)"/><circle cx="20" cy="7.6" r="1.2"/></symbol>
+  <symbol id="i-panchanga" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01"/></symbol>
+  <symbol id="i-muhurta" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></symbol>
+  <symbol id="i-vargas" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></symbol>
+  <symbol id="i-yogas" viewBox="0 0 24 24"><path d="M12 3l1.9 5.8L20 10l-6.1 1.2L12 17l-1.9-5.8L4 10l6.1-1.2Z"/><path d="M19 15v4M17 17h4M5 3v4M3 5h4"/></symbol>
+  <symbol id="i-match" viewBox="0 0 24 24"><path d="M19 14c1.5-1.5 3-3.2 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.8 0-3 .5-4.5 2-1.5-1.5-2.7-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4 3 5.5l7 7Z"/></symbol>
+  <symbol id="i-eclipse" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 0 0 18Z" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></symbol>
+  <symbol id="i-reports" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></symbol>
+  <symbol id="i-saved" viewBox="0 0 24 24"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2Z"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.8l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.8v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-method" viewBox="0 0 24 24"><path d="M2 4h6a4 4 0 0 1 4 4v13a3 3 0 0 0-3-3H2zM22 4h-6a4 4 0 0 0-4 4v13a3 3 0 0 1 3-3h7z"/></symbol>
+  <symbol id="i-festival" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.4-.5-2-1-3-1.1-2.1-.2-4 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.2.4-2.3 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+  <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+  <symbol id="i-locate" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+  <symbol id="i-sunrise" viewBox="0 0 24 24"><path d="M12 2v7M4.9 10.9l1.4 1.4M2 18h2M20 18h2M19.1 10.9l-1.4 1.4M22 22H2M8 6l4-4 4 4M16 18a4 4 0 0 0-8 0"/></symbol>
+  <symbol id="i-sunset" viewBox="0 0 24 24"><path d="M12 9V2M4.9 10.9l1.4 1.4M2 18h2M20 18h2M19.1 10.9l-1.4 1.4M22 22H2M16 5l-4 4-4-4M16 18a4 4 0 0 0-8 0"/></symbol>
+  <symbol id="i-moonrise" viewBox="0 0 24 24"><path d="M10 4a5 5 0 0 0 7 7 7 7 0 1 1-7-7Z"/><path d="M2 21h20"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.8-6.2-3.2-6.2 3.2L7 14.2 2 9.3l6.9-1Z"/></symbol>
+  <symbol id="i-compass" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3z"/></symbol>
+  <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+  <symbol id="i-table" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M12 3v18"/></symbol>
+  <symbol id="i-timeline" viewBox="0 0 24 24"><path d="M3 12h18M7 8v8M12 6v12M17 9v6"/></symbol>
+  <symbol id="i-bars" viewBox="0 0 24 24"><path d="M3 3v18h18M7 16V9M12 16V5M17 16v-3"/></symbol>
+  <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 22a10 10 0 1 1 10-10c0 2.8-2.2 4-4 4h-2a2 2 0 0 0-1.5 3.3A1.6 1.6 0 0 1 12 22Z"/><circle cx="7.5" cy="10.5" r="1"/><circle cx="12" cy="7" r="1"/><circle cx="16.5" cy="10.5" r="1"/></symbol>
+  <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 4 10 15 15 0 0 1-4 10 15 15 0 0 1-4-10 15 15 0 0 1 4-10z"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8M21 3v5h-5"/></symbol>
+  <symbol id="i-edit" viewBox="0 0 24 24"><path d="M17 3a2.8 2.8 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+</svg>
+
+<div class="app" id="app">
+  <aside class="side" id="side">
+    <div class="side-head">
+      <a class="brand" href="#dashboard" data-tab-link="dashboard"><svg class="logo"><use href="#i-logo"/></svg><span>ASTRA</span></a>
+      <button class="side-btn" id="side-toggle" type="button" aria-label="Collapse menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+    </div>
+    <nav class="nav" id="nav">
+      <a class="nav-i" data-tab="dashboard" href="#dashboard"><svg class="ico"><use href="#i-dashboard"/></svg><span data-i18n="tab_dashboard">Dashboard</span></a>
+      <a class="nav-i" data-tab="chart" href="#chart"><svg class="ico"><use href="#i-chart"/></svg><span data-i18n="tab_chart">Birth Chart</span></a>
+      <a class="nav-i" data-tab="dashas" href="#dashas"><svg class="ico"><use href="#i-dashas"/></svg><span data-i18n="tab_dashas">Dashas</span></a>
+      <a class="nav-i" data-tab="transits" href="#transits"><svg class="ico"><use href="#i-transits"/></svg><span data-i18n="tab_transits">Transits</span></a>
+      <a class="nav-i" data-tab="panchanga" data-also="calendar festivals" href="#panchanga"><svg class="ico"><use href="#i-panchanga"/></svg><span data-i18n="tab_panchanga">Panchanga</span></a>
+      <a class="nav-i" data-tab="muhurta" href="#muhurta"><svg class="ico"><use href="#i-muhurta"/></svg><span data-i18n="tab_muhurta">Muhurta</span></a>
+      <a class="nav-i" data-tab="vargas" href="#vargas"><svg class="ico"><use href="#i-vargas"/></svg><span data-i18n="tab_vargas">Vargas</span></a>
+      <a class="nav-i" data-tab="yogas" href="#yogas"><svg class="ico"><use href="#i-yogas"/></svg><span data-i18n="tab_yogas">Yogas &amp; Strength</span></a>
+      <a class="nav-i" data-tab="match" href="#match"><svg class="ico"><use href="#i-match"/></svg><span data-i18n="tab_match">Matching</span></a>
+      <a class="nav-i" data-tab="eclipses" href="#eclipses"><svg class="ico"><use href="#i-eclipse"/></svg><span data-i18n="tab_eclipses">Eclipses</span></a>
+      <a class="nav-i" data-tab="search" href="#search"><svg class="ico"><use href="#i-search"/></svg><span data-i18n="tab_search">Event Search</span></a>
+      <div class="nav-sep"></div>
+      <a class="nav-i" data-tab="reports" href="#reports"><svg class="ico"><use href="#i-reports"/></svg><span data-i18n="tab_reports">Reports</span></a>
+      <a class="nav-i" data-tab="profiles" href="#profiles"><svg class="ico"><use href="#i-saved"/></svg><span data-i18n="tab_saved">Saved Charts</span></a>
+      <a class="nav-i" data-tab="settings" href="#settings"><svg class="ico"><use href="#i-settings"/></svg><span data-i18n="tab_settings">Settings</span></a>
+      <a class="nav-i" data-tab="method" href="#method"><svg class="ico"><use href="#i-method"/></svg><span data-i18n="tab_method">Method</span></a>
+    </nav>
+    <div class="side-foot">
+      <div id="status" class="status loading" title="Python engine status"><span class="dot"></span><span id="status-text">Starting engine&hellip;</span></div>
+      <p class="side-note">Calculated from NASA JPL DE440. No AI, no copied panchangam.</p>
+    </div>
+  </aside>
+  <div class="scrim" id="scrim"></div>
+
+  <div class="main" id="main">
+    <header class="topbar" id="topbar">
+      <button class="icon-btn mob-only" id="mob-menu" type="button" aria-label="Open menu"><svg class="ico"><use href="#i-menu"/></svg></button>
+      <div class="gsearch">
+        <svg class="ico"><use href="#i-search"/></svg>
+        <input id="gsearch" type="search" placeholder="Search charts, pages, places&hellip;" autocomplete="off" aria-label="Search">
+        <kbd>/</kbd>
+        <div class="pop gs-pop" id="gs-pop" hidden></div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="bell-btn" type="button" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="badge" id="bell-badge" hidden></span></button>
+        <div class="pop bell-pop" id="bell-pop" hidden></div>
+        <button class="avatar" id="avatar-btn" type="button" aria-label="Account menu">A</button>
+        <div class="pop avatar-pop" id="avatar-pop" hidden>
+          <div class="pop-title">Quick settings</div>
+          <label class="pop-row"><span><svg class="ico"><use href="#i-globe"/></svg> <span data-i18n="Language">Language</span></span><select id="lang-select" aria-label="Language"></select></label>
+          <button class="pop-row" id="theme-btn" type="button"><span><svg class="ico"><use href="#i-moon"/></svg> Dark mode</span><span class="switch" id="theme-switch"></span></button>
+          <a class="pop-row" href="#profiles" data-tab-link="profiles"><span><svg class="ico"><use href="#i-saved"/></svg> Saved charts</span></a>
+          <a class="pop-row" href="#settings" data-tab-link="settings"><span><svg class="ico"><use href="#i-settings"/></svg> All settings</span></a>
+        </div>
+      </div>
+    </header>
+
+    <main class="content" id="content">
+
+    <!-- ================= dashboard ================= -->
+    <section id="tab-dashboard" class="page">
+      <div class="hero">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="hero-inner">
+          <div class="hero-copy">
+            <h1>Welcome to ASTRA</h1>
+            <p class="hero-sub">Ancient Wisdom, Modern Clarity.</p>
+            <div class="hero-btns">
+              <a class="btn primary lg" href="#chart" data-tab-link="chart"><svg class="ico"><use href="#i-plus"/></svg>Create New Chart</a>
+              <a class="btn glass lg" href="#features" id="explore-btn"><svg class="ico"><use href="#i-compass"/></svg>Explore Features</a>
+            </div>
+          </div>
+          <blockquote class="hero-quote">&ldquo;Time is the field,<br>Planets are the indicators,<br>Wisdom is the key.&rdquo;<span></span></blockquote>
+          <div class="today-card" id="today-card">
+            <div class="today-head"><div><div class="k">Today</div><div class="d" id="today-date">&mdash;</div></div><div class="loc"><svg class="ico"><use href="#i-pin"/></svg><span id="today-place">&mdash;</span></div></div>
+            <div id="today-rows" class="today-rows"><div class="today-wait">Calculating today&rsquo;s Panchanga&hellip;</div></div>
+          </div>
+        </div>
+        <div class="feature-row" id="features">
+          <a class="feat" href="#chart" data-tab-link="chart"><span class="fi c1"><svg class="ico"><use href="#i-chart"/></svg></span><span class="ft"><b>Birth Chart</b><small>Rasi, Navamsha and more</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
+          <a class="feat" href="#dashas" data-tab-link="dashas"><span class="fi c2"><svg class="ico"><use href="#i-dashas"/></svg></span><span class="ft"><b>Dashas</b><small>Vimshottari and other systems</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
+          <a class="feat" href="#transits" data-tab-link="transits"><span class="fi c3"><svg class="ico"><use href="#i-transits"/></svg></span><span class="ft"><b>Transits</b><small>Gochara &amp; Sade Sati</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
+          <a class="feat" href="#panchanga" data-tab-link="panchanga"><span class="fi c4"><svg class="ico"><use href="#i-panchanga"/></svg></span><span class="ft"><b>Panchanga</b><small>Tithi, Nakshatra, Yoga, Karana</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
+          <a class="feat" href="#muhurta" data-tab-link="muhurta"><span class="fi c5"><svg class="ico"><use href="#i-muhurta"/></svg></span><span class="ft"><b>Muhurta</b><small>Find auspicious timings</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
+          <a class="feat" href="#reports" data-tab-link="reports"><span class="fi c6"><svg class="ico"><use href="#i-reports"/></svg></span><span class="ft"><b>Reports</b><small>PDF reports &amp; analysis</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="card" id="dash-timings"><div class="card-head"><h3>Today&rsquo;s timings</h3><a class="link" href="#panchanga" data-tab-link="panchanga">Full Panchanga</a></div><div class="skeleton"></div></div>
+        <div class="card" id="dash-fest"><div class="card-head"><h3>Upcoming festivals</h3><a class="link" href="#festivals" data-tab-link="festivals">Year view</a></div><div class="skeleton"></div></div>
+        <div class="card" id="dash-saved"><div class="card-head"><h3>Saved charts</h3><a class="link" href="#profiles" data-tab-link="profiles">Manage</a></div><div class="dash-saved-list"></div></div>
+      </div>
+      <div class="dash-more">
+        <a class="mini-feat" href="#vargas" data-tab-link="vargas"><svg class="ico"><use href="#i-vargas"/></svg><span><b>Vargas</b><small>16 divisional charts</small></span></a>
+        <a class="mini-feat" href="#yogas" data-tab-link="yogas"><svg class="ico"><use href="#i-yogas"/></svg><span><b>Yogas &amp; Strength</b><small>Doshas, Shadbala, Ashtakavarga</small></span></a>
+        <a class="mini-feat" href="#match" data-tab-link="match"><svg class="ico"><use href="#i-match"/></svg><span><b>Matching</b><small>Ashtakoota &amp; 10 poruthams</small></span></a>
+        <a class="mini-feat" href="#calendar" data-tab-link="calendar"><svg class="ico"><use href="#i-panchanga"/></svg><span><b>Monthly calendar</b><small>Tithi, nakshatra, festivals</small></span></a>
+        <a class="mini-feat" href="#eclipses" data-tab-link="eclipses"><svg class="ico"><use href="#i-eclipse"/></svg><span><b>Eclipses</b><small>Local contact times</small></span></a>
+        <a class="mini-feat" href="#search" data-tab-link="search"><svg class="ico"><use href="#i-search"/></svg><span><b>Event search</b><small>Past or future, with filters</small></span></a>
+      </div>
+    </section>
+
+    <!-- ================= birth chart ================= -->
+    <section id="tab-chart" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_chart">Birth Chart</h1><p class="sub">Enter birth details to generate accurate charts</p></div>
+        <div class="head-tools"><div class="seg sm style-toggle"><button type="button" data-style="north">North Indian</button><button type="button" data-style="south">South Indian</button></div></div>
+      </div>
+      <div class="seg-row"><div class="seg"><button type="button" class="on">Single Chart</button><button type="button" data-go="match">Compare Charts</button><button type="button" data-go="profiles">Saved Charts</button></div></div>
+      <div class="chart-layout">
+        <form id="chart-form" class="card form hform">
+          <div class="card-head"><h3>Birth Details</h3></div>
+          <label>Saved profile <select class="profile-pick" data-target="chart"></select></label>
+          <label><span data-i18n="Name">Name</span> <input name="name" placeholder="Optional"></label>
+          <label>Date of Birth <input name="date" type="date" required value="1998-12-10"></label>
+          <label>Time of Birth <input name="time" type="time" step="1" required value="18:10:00"></label>
+          <div class="place-slot" data-coords="18.576216339514087, 83.3587995791954" data-place="Visakhapatnam, Andhra Pradesh, India" data-label="Place of Birth"></div>
+          <label>Ayanamsa
+            <select name="ayanamsa" class="set-ayanamsa">
+              <option value="lahiri">Lahiri (Chitra Paksha, IAE true)</option>
+              <option value="lahiri_icrc_mean">Lahiri (mean 23&deg;15'00&quot; @1956)</option>
+            </select>
+          </label>
+          <details class="adv">
+            <summary><svg class="ico"><use href="#i-sliders"/></svg> Advanced Options</summary>
+            <label>Rahu / Ketu <select name="node" class="set-node"><option value="true">True (osculating) node</option><option value="mean">Mean node</option></select></label>
+            <label>Dasha year
+              <select name="dasha_year" class="set-dasha_year">
+                <option value="julian">365.25 days</option>
+                <option value="tropical">365.2422 days</option>
+                <option value="savana">360 days (savana)</option>
+              </select>
+            </label>
+            <label>Sunrise rule <select name="sunrise_profile" class="sunrise-select set-sunrise_profile"></select></label>
+            <label>Elevation (m) <input name="elevation" type="number" value="0" step="1" class="set-elevation"></label>
+          </details>
+          <button type="submit" class="btn primary block lg" data-i18n="Generate Chart">Generate Chart</button>
+          <div class="form-foot"><button type="button" class="btn ghost sm save-profile"><svg class="ico"><use href="#i-star"/></svg><span data-i18n="Save profile">Save profile</span></button><span class="hint" id="chart-hint"></span></div>
+        </form>
+        <div class="card chart-card">
+          <div class="card-head"><h3 id="chart-title">Rasi Chart</h3><select id="chart-varga" class="sel-sm" aria-label="Divisional chart"></select></div>
+          <div id="chart-visual" class="chart-visual"></div>
+          <div id="chart-details"></div>
+        </div>
+      </div>
+      <div class="subtabs" id="chart-sub" hidden>
+        <button type="button" data-sub="overview" class="on">Planets</button>
+        <button type="button" data-sub="bhava">Bhavas</button>
+        <button type="button" data-sub="jaimini">Jaimini</button>
+        <button type="button" data-sub="upagraha">Upagrahas</button>
+        <button type="button" data-sub="tech">Calculation trace</button>
+        <span class="subtabs-sep"></span>
+        <button type="button" data-go="dashas" class="go">Dashas <svg class="ico"><use href="#i-right"/></svg></button>
+        <button type="button" data-go="vargas" class="go">Vargas <svg class="ico"><use href="#i-right"/></svg></button>
+        <button type="button" data-go="yogas" class="go">Yogas &amp; Strength <svg class="ico"><use href="#i-right"/></svg></button>
+      </div>
+      <div id="chart-out"></div>
+    </section>
+
+    <!-- ================= dashas ================= -->
+    <section id="tab-dashas" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_dashas">Dashas</h1><p class="sub">Planetary periods and sub-periods</p></div>
+        <div class="head-tools"><div class="chart-source" data-page="dashas"></div></div>
+      </div>
+      <div class="seg-row"><div class="seg" id="dasha-sys">
+        <button type="button" data-sys="vimshottari" class="on">Vimshottari</button>
+        <button type="button" data-sys="chara">Chara</button>
+        <button type="button" data-sys="yogini">Yogini</button>
+        <button type="button" data-sys="ashtottari">Ashtottari</button>
+      </div></div>
+      <div id="dashas-out"></div>
+    </section>
+
+    <!-- ================= vargas ================= -->
+    <section id="tab-vargas" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_vargas">Vargas</h1><p class="sub">Divisional charts for deeper analysis</p></div>
+        <div class="head-tools"><div class="seg sm style-toggle"><button type="button" data-style="north">North</button><button type="button" data-style="south">South</button></div><div class="chart-source" data-page="vargas"></div></div>
+      </div>
+      <div class="seg-row"><div class="seg" id="varga-tabs">
+        <button type="button" data-v="D9" class="on">Navamsha</button>
+        <button type="button" data-v="D10">Dashamsha</button>
+        <button type="button" data-v="D12">Dvadashamsha</button>
+        <button type="button" data-v="other">Others</button>
+      </div><select id="varga-select" class="sel-sm" aria-label="Divisional chart"></select></div>
+      <div id="vargas-out"></div>
+    </section>
+
+    <!-- ================= yogas ================= -->
+    <section id="tab-yogas" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_yogas">Yogas &amp; Strength</h1><p class="sub">Yogas, doshas, Shadbala and Ashtakavarga from calculated positions</p></div>
+        <div class="head-tools"><div class="chart-source" data-page="yogas"></div></div>
+      </div>
+      <div class="seg-row"><div class="seg" id="yoga-tabs">
+        <button type="button" data-y="yogas" class="on">Yogas</button>
+        <button type="button" data-y="doshas">Doshas</button>
+        <button type="button" data-y="shadbala">Shadbala</button>
+        <button type="button" data-y="av">Ashtakavarga</button>
+      </div></div>
+      <div id="yogas-out"></div>
+    </section>
+
+    <!-- ================= transits ================= -->
+    <section id="tab-transits" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_transits">Transits</h1><p class="sub">Current and future planetary transits over your chart</p></div>
+        <div class="head-tools"><button type="button" class="btn ghost sm" id="transit-edit"><svg class="ico"><use href="#i-edit"/></svg>Birth details</button></div>
+      </div>
+      <div class="seg-row"><div class="seg" id="transit-mode"></div></div>
+      <form id="transit-form" class="card form collapsible">
+        <div class="card-head"><h3>Natal (birth) details</h3><span class="hint">Pick a saved chart or enter the birth data</span></div>
+        <div class="birth-slot" data-prefix="birth_"></div>
+        <div class="custom-moment">
+          <h3 class="sec-title">Transit moment</h3>
+          <div class="grid">
+            <label><span data-i18n="Date">Date</span> <input name="date" type="date" required></label>
+            <label><span data-i18n="Time">Time</span> <input name="time" type="time" step="1" required></label>
+          </div>
+          <div class="place-slot" data-variant="compact" data-label="Current place (for transit lagna)"></div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button>
+          <button type="button" class="btn ghost now-btn"><svg class="ico"><use href="#i-refresh"/></svg>Now</button>
+          <span class="hint" id="transit-hint"></span>
+        </div>
+      </form>
+      <div id="transit-out"></div>
+      <div id="transit-year" hidden></div>
+    </section>
+
+    <!-- ================= matching ================= -->
+    <section id="tab-match" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_match">Matching</h1><p class="sub">Ashtakoota and the ten poruthams on calculated Moon positions</p></div>
+      </div>
+      <div class="seg-row"><div class="seg"><button type="button" data-go="chart">Single Chart</button><button type="button" class="on">Compare Charts</button><button type="button" data-go="profiles">Saved Charts</button></div></div>
+      <form id="match-form" class="card form">
+        <div class="two-even">
+          <div class="person-box"><h3 class="sec-title"><span class="pdot g"></span><span data-i18n="Groom">Groom</span></h3><div class="birth-slot" data-prefix="g_"></div></div>
+          <div class="person-box"><h3 class="sec-title"><span class="pdot b"></span><span data-i18n="Bride">Bride</span></h3><div class="birth-slot" data-prefix="b_"></div></div>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button>
+          <span class="hint" id="match-hint"></span>
+        </div>
+      </form>
+      <div id="match-out"></div>
+    </section>
+
+    <!-- ================= daily panchanga ================= -->
+    <section id="tab-panchanga" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_panchanga">Panchanga</h1><p class="sub">Daily, monthly and yearly Panchanga details</p></div>
+      </div>
+      <div class="seg-row"><div class="seg panch-seg"><button type="button" class="on">Daily</button><button type="button" data-go="calendar">Monthly</button><button type="button" data-go="festivals">Yearly</button></div></div>
+      <form id="panch-form" class="card form toolbar">
+        <div class="tb-date">
+          <button type="button" class="icon-btn day-step" data-step="-1" aria-label="Previous day"><svg class="ico"><use href="#i-left"/></svg></button>
+          <label class="bare"><span class="sr" data-i18n="Date">Date</span><input name="date" type="date" required></label>
+          <button type="button" class="icon-btn day-step" data-step="1" aria-label="Next day"><svg class="ico"><use href="#i-right"/></svg></button>
+          <button type="button" class="btn ghost sm today-btn" data-i18n="Today">Today</button>
+        </div>
+        <div class="place-slot" data-variant="compact"></div>
+        <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="panch-hint"></span></div>
+      </form>
+      <div id="panch-out"></div>
+    </section>
+
+    <!-- ================= month calendar ================= -->
+    <section id="tab-calendar" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_panchanga">Panchanga</h1><p class="sub">A full Panchanga month with moon phases, festivals and daily timings</p></div>
+      </div>
+      <div class="seg-row"><div class="seg panch-seg"><button type="button" data-go="panchanga">Daily</button><button type="button" class="on">Monthly</button><button type="button" data-go="festivals">Yearly</button></div></div>
+      <form id="cal-form" class="card form toolbar">
+        <div class="tb-date">
+          <button type="button" class="icon-btn month-step" data-step="-1" aria-label="Previous month"><svg class="ico"><use href="#i-left"/></svg></button>
+          <label class="bare"><span class="sr" data-i18n="Month">Month</span><input name="month" type="month" required></label>
+          <button type="button" class="icon-btn month-step" data-step="1" aria-label="Next month"><svg class="ico"><use href="#i-right"/></svg></button>
+        </div>
+        <label class="bare">Show
+          <select name="show">
+            <option value="tithi">Tithi, nakshatra, festivals</option>
+            <option value="sun">Sunrise / sunset</option>
+            <option value="rahu">Rahu kala</option>
+            <option value="moon">Moonrise / moonset</option>
+          </select>
+        </label>
+        <div class="place-slot" data-variant="compact"></div>
+        <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="cal-hint"></span></div>
+      </form>
+      <div id="cal-out"></div>
+    </section>
+
+    <!-- ================= festivals ================= -->
+    <section id="tab-festivals" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_panchanga">Panchanga</h1><p class="sub">Every festival and vrata of the year, resolved by its classical rule for your location</p></div>
+      </div>
+      <div class="seg-row"><div class="seg panch-seg"><button type="button" data-go="panchanga">Daily</button><button type="button" data-go="calendar">Monthly</button><button type="button" class="on">Yearly</button></div></div>
+      <form id="fest-form" class="card form">
+        <div class="grid">
+          <label>Year <input name="year" type="number" min="1900" max="2140" required></label>
+          <label>Filter text <input name="q" placeholder="e.g. Ekadashi, Navami"></label>
+        </div>
+        <div class="field-title" data-i18n="Categories">Categories</div>
+        <div class="checks" id="fest-cats"></div>
+        <div class="place-slot" data-variant="compact"></div>
+        <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="fest-hint"></span></div>
+      </form>
+      <div id="fest-out"></div>
+    </section>
+
+    <!-- ================= muhurta ================= -->
+    <section id="tab-muhurta" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_muhurta">Muhurta</h1><p class="sub">Auspicious windows for your activity, filtered through classical rules and the real sky</p></div>
+      </div>
+      <form id="muhurta-form" class="card form">
+        <div class="grid">
+          <label><span data-i18n="Activity">Activity</span>
+            <select name="activity">
+              <option value="general">Any auspicious work</option>
+              <option value="marriage">Marriage (Vivaha)</option>
+              <option value="griha_pravesha">House warming (Griha Pravesha)</option>
+              <option value="vehicle">Vehicle purchase</option>
+              <option value="business">Business / shop opening</option>
+              <option value="property">Property / land purchase</option>
+              <option value="travel">Travel / journey start</option>
+              <option value="namakarana">Naming ceremony (Namakarana)</option>
+              <option value="annaprashana">First feeding (Annaprashana)</option>
+              <option value="vidyarambha">Start of education (Aksharabhyasa)</option>
+              <option value="upanayana">Thread ceremony (Upanayana)</option>
+              <option value="medical">Start medical treatment</option>
+            </select>
+          </label>
+          <label><span data-i18n="From">From</span> <input name="start" type="date" required></label>
+          <label><span data-i18n="To">To</span> <input name="end" type="date" required></label>
+          <label>Minimum window (minutes) <input name="min_minutes" type="number" value="24" min="5" step="1"></label>
+          <label>Birth nakshatra (Tarabala) <select name="birth_nakshatra" class="opt-nak"><option value="">Not used</option></select></label>
+          <label>Birth Moon rashi (Chandrabala) <select name="birth_rashi" class="opt-rashi"><option value="">Not used</option></select></label>
+        </div>
+        <label class="toggle-row inline"><input type="checkbox" name="include_night" class="sw"> Include night windows</label>
+        <div class="place-slot" data-variant="compact"></div>
+        <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Find muhurtas</button><span class="hint" id="muhurta-hint"></span></div>
+      </form>
+      <div id="muhurta-out"></div>
+    </section>
+
+    <!-- ================= eclipses ================= -->
+    <section id="tab-eclipses" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_eclipses">Eclipses</h1><p class="sub">Solar and lunar eclipses with local contact times, magnitude and visibility</p></div>
+      </div>
+      <form id="eclipse-form" class="card form">
+        <div class="grid">
+          <label><span data-i18n="From">From</span> <input name="start" type="date" required></label>
+          <label><span data-i18n="To">To</span> <input name="end" type="date" required></label>
+        </div>
+        <div class="checks">
+          <label class="chk"><input type="checkbox" name="solar" checked> Solar</label>
+          <label class="chk"><input type="checkbox" name="lunar" checked> Lunar</label>
+          <label class="chk"><input type="checkbox" name="visible_only"> Only visible here</label>
+        </div>
+        <div class="place-slot" data-variant="compact"></div>
+        <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="eclipse-hint"></span></div>
+      </form>
+      <div id="eclipse-out"></div>
+    </section>
+
+    <!-- ================= event search ================= -->
+    <section id="tab-search" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_search">Event Search</h1><p class="sub">Every tithi, nakshatra, ingress, station or conjunction between any two dates, past or future</p></div>
+      </div>
+      <form id="search-form" class="card form">
+        <div class="grid">
+          <label><span data-i18n="From">From</span> <input name="start" type="date" required></label>
+          <label><span data-i18n="To">To</span> <input name="end" type="date" required></label>
+          <label>Quick range
+            <select name="quick">
+              <option value="">Custom</option>
+              <option value="m1">Next 1 month</option>
+              <option value="m3">Next 3 months</option>
+              <option value="y1">Next 12 months</option>
+              <option value="py1">Past 12 months</option>
+              <option value="y10">Next 10 years (planets only)</option>
+              <option value="y50">Next 50 years (planets only)</option>
+            </select>
+          </label>
+        </div>
+        <div class="field-title" data-i18n="Categories">Categories</div>
+        <div class="checks" id="search-cats"></div>
+        <div class="field-title">Planets <small>for ingress, stations, combustion, conjunctions</small></div>
+        <div class="checks" id="search-planets"></div>
+        <details class="adv">
+          <summary><svg class="ico"><use href="#i-sliders"/></svg> Filters (leave empty for all)</summary>
+          <div class="grid">
+            <label>Tithi <select name="f_tithi" multiple size="6" class="opt-tithi"></select></label>
+            <label>Nakshatra <select name="f_nak" multiple size="6" class="opt-nak"></select></label>
+            <label>Yoga <select name="f_yoga" multiple size="6" class="opt-yoga"></select></label>
+            <label>Moon rashi <select name="f_rashi" multiple size="6" class="opt-rashi"></select></label>
+            <label>Sankranti (Sun sign) <select name="f_rashi_sun" multiple size="6" class="opt-rashi"></select></label>
+            <label>Lunation phases
+              <select name="f_phase" multiple size="4">
+                <option value="0">New Moon</option><option value="1">First quarter</option>
+                <option value="2">Full Moon</option><option value="3">Last quarter</option>
+              </select>
+            </label>
+            <label>Karana
+              <select name="f_karana" multiple size="6">
+                <option>Bava</option><option>Balava</option><option>Kaulava</option><option>Taitila</option><option>Gara</option>
+                <option>Vanija</option><option>Vishti</option><option>Shakuni</option><option>Chatushpada</option><option>Naga</option><option>Kimstughna</option>
+              </select>
+            </label>
+            <label>Weekday (applied to results) <select name="f_wd" multiple size="7" class="opt-vara"></select></label>
+          </div>
+          <p class="hint">Hold Ctrl (or Cmd) to pick several values in a list.</p>
+        </details>
+        <div class="place-slot" data-variant="compact"></div>
+        <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Search</button><span class="hint" id="search-hint"></span></div>
+      </form>
+      <div id="search-out"></div>
+    </section>
+
+    <!-- ================= reports ================= -->
+    <section id="tab-reports" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_reports">Reports</h1><p class="sub">Generate detailed, printable reports. Use &ldquo;Save as PDF&rdquo; in the print dialog.</p></div>
+      </div>
+      <div class="card report-list" id="report-list"></div>
+    </section>
+
+    <!-- ================= saved charts ================= -->
+    <section id="tab-profiles" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_saved">Saved Charts</h1><p class="sub">People and places saved privately in this browser</p></div>
+        <div class="head-tools">
+          <button class="btn ghost sm" id="export-profiles" type="button"><svg class="ico"><use href="#i-download"/></svg>Export</button>
+          <label class="btn ghost sm file-btn"><svg class="ico"><use href="#i-upload"/></svg>Import <input type="file" id="import-profiles" accept="application/json" hidden></label>
+          <a class="btn primary sm" href="#chart" data-tab-link="chart"><svg class="ico"><use href="#i-plus"/></svg>New chart</a>
+        </div>
+      </div>
+      <div class="seg-row"><div class="seg"><button type="button" data-go="chart">Single Chart</button><button type="button" data-go="match">Compare Charts</button><button type="button" class="on">Saved Charts</button></div></div>
+      <div class="card"><div class="card-head"><h3 data-i18n="Saved profiles">Saved profiles</h3><span class="hint">Use them in Birth Chart, Transits, Matching and Reports</span></div><div id="profiles-list"></div></div>
+      <div class="card"><div class="card-head"><h3>Saved places</h3><span class="hint">Pick them in any place field</span></div><div id="places-list"></div></div>
+    </section>
+
+    <!-- ================= settings ================= -->
+    <section id="tab-settings" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_settings">Settings</h1><p class="sub">Customise calculations and appearance</p></div>
+      </div>
+      <div class="seg-row"><div class="seg" id="set-tabs">
+        <button type="button" data-s="calc" class="on"><svg class="ico"><use href="#i-sliders"/></svg>Calculation</button>
+        <button type="button" data-s="look"><svg class="ico"><use href="#i-palette"/></svg>Appearance</button>
+        <button type="button" data-s="loc"><svg class="ico"><use href="#i-pin"/></svg>Location</button>
+        <button type="button" data-s="data"><svg class="ico"><use href="#i-database"/></svg>Data</button>
+      </div></div>
+      <form id="settings-form" class="card form settings">
+        <div class="set-pane" data-pane="calc">
+          <div class="set-row"><div><b>Ayanamsa</b><small>Sidereal zodiac offset</small></div>
+            <select name="ayanamsa"><option value="lahiri">Lahiri (Chitra Paksha, IAE true)</option><option value="lahiri_icrc_mean">Lahiri (mean 23&deg;15'00&quot; @1956)</option></select></div>
+          <div class="set-row"><div><b>Rahu / Ketu</b><small>Lunar node model</small></div>
+            <select name="node"><option value="true">True (osculating) node</option><option value="mean">Mean node</option></select></div>
+          <div class="set-row"><div><b>Dasha year length</b><small>Used for every dasha system</small></div>
+            <select name="dasha_year"><option value="julian">365.25 days</option><option value="tropical">365.2422 days</option><option value="savana">360 days (savana)</option></select></div>
+          <div class="set-row"><div><b>Sunrise definition</b><small>Panchanga day starts at sunrise</small></div>
+            <select name="sunrise_profile" class="sunrise-select"></select></div>
+          <div class="set-row"><div><b>House system</b><small>Charts use whole signs; Sripati bhava madhyas are listed beside them</small></div>
+            <select name="house" disabled><option>Whole Sign + Sripati</option></select></div>
+          <div class="set-row"><div><b>Chart style</b><small>Kundali drawing</small></div>
+            <select name="chart_style"><option value="north">North Indian</option><option value="south">South Indian</option></select></div>
+          <div class="set-row"><div><b>Default elevation</b><small>Metres above sea level, used for sunrise</small></div>
+            <input name="elevation" type="number" step="1" value="0"></div>
+          <label class="set-row"><div><b>Show retrograde (R)</b><small>Mark retrograde planets in charts</small></div><input type="checkbox" name="show_retro" class="sw"></label>
+          <label class="set-row"><div><b>Show degrees in charts</b><small>Print each planet's degree inside the kundali</small></div><input type="checkbox" name="show_deg" class="sw"></label>
+          <label class="set-row"><div><b>Show outer planets</b><small>Uranus, Neptune and Pluto in tables and the Rasi chart</small></div><input type="checkbox" name="show_outer" class="sw"></label>
+        </div>
+        <div class="set-pane" data-pane="look" hidden>
+          <div class="set-row"><div><b>Theme</b><small>Light, dark or follow the system</small></div>
+            <select name="theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system">System</option></select></div>
+          <div class="set-row"><div><b>Language</b><small>Names of tithis, nakshatras, rashis and grahas</small></div>
+            <select name="lang" id="set-lang"></select></div>
+          <div class="set-row"><div><b>Start page</b><small>What opens when you visit</small></div>
+            <select name="start_page"><option value="dashboard">Dashboard</option><option value="chart">Birth Chart</option><option value="panchanga">Panchanga</option><option value="calendar">Monthly calendar</option></select></div>
+        </div>
+        <div class="set-pane" data-pane="loc" hidden>
+          <p class="hint">Default place for the dashboard and every new form. You can still change the place on each page.</p>
+          <div class="place-slot" data-prefix="set_" data-label="Default place"></div>
+        </div>
+        <div class="set-pane" data-pane="data" hidden>
+          <div class="set-row"><div><b>Back up everything</b><small>Profiles, places and settings as one JSON file</small></div>
+            <button type="button" class="btn ghost sm" id="set-export"><svg class="ico"><use href="#i-download"/></svg>Export</button></div>
+          <div class="set-row"><div><b>Restore a backup</b><small>Merges nothing: replaces what is in the file</small></div>
+            <label class="btn ghost sm file-btn"><svg class="ico"><use href="#i-upload"/></svg>Import<input type="file" id="set-import" accept="application/json" hidden></label></div>
+          <div class="set-row"><div><b>Storage used</b><small id="set-storage">&mdash;</small></div><span></span></div>
+          <div class="set-row danger"><div><b>Clear all data</b><small>Deletes saved charts, places and settings from this browser</small></div>
+            <button type="button" class="btn danger sm" id="set-clear"><svg class="ico"><use href="#i-trash"/></svg>Clear</button></div>
+        </div>
+        <button type="submit" class="btn primary block lg">Save Settings</button>
+      </form>
+    </section>
+
+    <!-- ================= method ================= -->
+    <section id="tab-method" class="page">
+      <div class="page-head">
+        <div><h1 data-i18n="tab_method">Method</h1><p class="sub">How every number is produced, and how far you can trust it</p></div>
+      </div>
+      <div class="card prose">
+        <h2>How every number is produced</h2>
+        <p>Nothing here is looked up from a panchangam or generated by AI. Each value is computed in your browser by a Python engine (running through WebAssembly) from date, time, latitude and longitude.</p>
+        <ol>
+          <li><b>Time</b>: local time &rarr; UTC (IANA time-zone history, daylight saving changes inside a range are sent to the engine) &rarr; TAI (leap seconds) &rarr; TT. Before 1972, Delta T (Espenak&ndash;Meeus).</li>
+          <li><b>Ephemeris</b>: NASA JPL DE440 Chebyshev coefficients (unmodified), 1850&ndash;2149.</li>
+          <li><b>Apparent place</b>: light-time, solar light deflection, relativistic aberration; IAU 2006 precession, IAU 2000A nutation.</li>
+          <li><b>Sidereal</b>: &lambda;<sub>sid</sub> = &lambda;<sub>trop</sub> &minus; A<sub>Lahiri</sub>(t), A propagated from its 1956 anchor.</li>
+          <li><b>Panchanga</b>: Tithi from E = &lambda;<sub>Moon</sub> &minus; &lambda;<sub>Sun</sub> in 12&deg; steps; Nakshatra in 13&deg;20&prime;; Yoga from the sum; Karana from 6&deg; half-tithis. Start/end times root-solved to about 1 s.</li>
+          <li><b>Range searches</b> (calendar, festivals, events, muhurta): body longitudes are sampled daily and interpolated with 8-point Lagrange (Moon error &lt; 0.1&Prime;), then every boundary is root-solved. Long planetary scans (beyond 3 years) use 4-day sampling on the mean equinox and are good to minutes.</li>
+          <li><b>Lunar months</b>: Amanta, named by the Sun's sidereal sign at the starting New Moon; a month with no sankranti is Adhika.</li>
+          <li><b>Festivals</b>: each rule is (month, tithi, time-of-day window): sunrise, arunodaya, purvahna, madhyahna, aparahna, pradosha, nishitha or moonrise. The civil day with the most tithi coverage in that window is chosen. Ekadashi follows the Smarta rule, with the Vaishnava date and the Parana window also shown.</li>
+          <li><b>Dashas</b>: Vimshottari from the Moon's unelapsed nakshatra arc; Yogini from (nakshatra + 3) mod 8; Ashtottari from the 27-nakshatra groups starting at Ardra; Chara dasha per K. N. Rao. Sukshma and Prana levels are subdivided with the same proportions.</li>
+          <li><b>Muhurta</b>: day/night windows are intersected with the activity's tithi, nakshatra, weekday and lagna rules, minus Rahu kala, Yamaganda, Gulika, Durmuhurta, Varjyam, Vishti, bad yogas and Rikta tithis; Tarabala and Chandrabala if birth data is given.</li>
+          <li><b>Transits</b>: exact positions at the transit moment; gochara from the natal Moon with Phaladeepika vedha; Sade Sati from root-solved Saturn ingresses.</li>
+          <li><b>Eclipses</b>: New/Full Moons are screened by the Moon's argument of latitude; lunar contacts from the Danjon shadow, solar eclipses from the shadow axis (gamma) and topocentric local circumstances.</li>
+          <li><b>Strength</b>: Shadbala per BPHS (profile shown); Ashtakavarga raw bindus; Gulika/Mandi from the day/night eighths.</li>
+          <li><b>Matching</b>: Ashtakoota (36 points) and the South Indian 10 poruthams on calculated Moon nakshatras, plus Kuja dosha from lagna and Moon.</li>
+          <li><b>Places</b>: city search uses OpenStreetMap Nominatim only to find coordinates; the time zone comes from your browser's IANA database.</li>
+        </ol>
+        <h3>Validation</h3>
+        <p>Positions agree with the independent Skyfield library to better than 0.001&Prime;; New Moons to 0.001 s; sunrise to about 2 s. Eclipse gammas and magnitudes match NASA's catalogue to about 0.005 (spherical Earth). 2027 festival dates for Hyderabad match the published Telugu calendars.</p>
+        <h3>Accuracy you should expect</h3>
+        <p>The astronomy is far more precise than any astrological boundary. The real limit is the birth time: the Lagna moves about 1&deg; every 4 minutes. Values close to a boundary are flagged. Festival dates are regional conventions; the rule used is shown next to every date.</p>
+      </div>
+    </section>
+
+    </main>
+    <footer class="foot"><b>ASTRA</b> &middot; Every value is calculated in your browser from NASA JPL DE440. No AI, no copied panchangam. <span id="engine-version"></span></footer>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script src="i18n.js"></script>
+<script src="app.js"></script>
+<script src="tabs.js"></script>
+<script src="pages.js"></script>
+</body>
+</html>

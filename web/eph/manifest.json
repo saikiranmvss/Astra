@@ -1,0 +1,9 @@
+{
+  "source": "JPL DE440s",
+  "epoch_jd": 2396752.5,
+  "chunk_days": 384.0,
+  "n_chunks": 286,
+  "start_jd": 2396752.5,
+  "end_jd": 2506352.5,
+  "version": 1
+}

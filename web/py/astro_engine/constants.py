@@ -1,0 +1,26 @@
+import math
+
+J2000 = 2451545.0
+DAY_S = 86400.0
+AU_KM = 149597870.7
+AU_M = AU_KM * 1000.0
+C_M_S = 299792458.0
+C_AUDAY = C_M_S * DAY_S / AU_M
+GS = 1.32712440017987e20  # heliocentric gravitational constant, m^3/s^2
+
+ASEC2RAD = math.pi / 648000.0
+DEG2RAD = math.pi / 180.0
+RAD2DEG = 180.0 / math.pi
+TAU = 2.0 * math.pi
+ASEC360 = 1296000.0
+
+# IERS 2010 reference ellipsoid
+ERAD_KM = 6378.1366
+EARTH_FLATTENING = 1.0 / 298.25642
+EARTH_ANGVEL = 7.2921150e-5  # rad/s
+
+MOON_RADIUS_KM = 1737.4
+SUN_RADIUS_KM = 696000.0
+
+NAKSHATRA_SPAN = 360.0 / 27.0
+PADA_SPAN = NAKSHATRA_SPAN / 4.0
