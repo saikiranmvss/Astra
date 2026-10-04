@@ -518,6 +518,7 @@ function refreshProfilePickers() {
   renderProfilesTab();
   if (typeof refreshChartSources === "function") refreshChartSources();
   if (typeof renderDashSaved === "function") renderDashSaved();
+  if (typeof refreshTodayPickers === "function") refreshTodayPickers();
 }
 document.addEventListener("change", (ev) => {
   const s = ev.target;
@@ -1013,6 +1014,7 @@ function renderPanchanga(r) {
         <div class="card-head"><h3>Moon Phase</h3><span class="hint">at sunrise</span></div>
         <div class="moon-body">${moonSVG(ti.index || 1, 76, elong)}<div><b>${esc(tr("paksha", r.lunar_month.paksha))} ${t("Paksha")}</b><div>${esc(trTithi(r.tithi[0].paksha, r.tithi[0].name))}</div><small>Illumination ${illum.toFixed(1)}% \u00b7 elongation ${elong.toFixed(1)}\u00b0</small></div></div>
       </div>
+      ${r.moudhya ? `<div class="card"><div class="card-head"><h3>Moudhyami</h3><span class="hint">Guru &amp; Shukra combustion</span></div>${moudhyaRows(r.moudhya)}</div>` : ""}
       <div class="card">
         <div class="card-head"><h3>Lunar Month &amp; Festivals</h3></div>
         <div class="month-pill"><span><b>${esc(tr("month", r.lunar_month.name))}${r.lunar_month.adhika ? " (Adhika)" : ""}</b> \u00b7 ${esc(tr("paksha", r.lunar_month.paksha))}</span><small>${esc(tr("ritu", r.lunar_month.ritu))} \u00b7 ${esc(tr("samvatsara", r.year.samvatsara))} \u00b7 Shaka ${r.year.shaka}</small></div>

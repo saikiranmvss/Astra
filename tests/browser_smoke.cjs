@@ -44,9 +44,22 @@ const shots = process.argv[4];
   await page.waitForSelector("#today-rows .tr-row", { timeout: 60000 });
   await page.waitForSelector("#dash-fest .fc", { timeout: 60000 });
   console.log("today:", (await page.$$eval("#today-rows .tr-row", (r) => r.map((x) => x.innerText.replace(/\s+/g, " ")))).join(" | "));
+  await page.waitForSelector("#dash-today .now-strip", { timeout: 120000 });
+  await page.waitForSelector("#dash-today svg.dchakra", { timeout: 5000 });
+  await page.waitForSelector("#dash-today svg.schakra", { timeout: 5000 });
+  console.log("today now:", (await page.$$eval("#dash-today .now-strip .nb", (r) => r.map((x) => x.innerText.replace(/\s+/g, " ")))).join(" | "));
+  console.log("today muhurta rows:", await page.$$eval("#today-muhurta tr", (r) => r.length - 1), "\u00b7", await page.$eval("#today-sub", (e) => e.textContent));
   await page.waitForTimeout(400);
   await shot("dashboard");
   await shot("dashboard_full", true);
+  await (await page.$("#dash-today")).screenshot({ path: path.join(shots, "today_section.png") });
+
+  // Today drawer
+  await page.click("#today-btn");
+  await page.waitForSelector("#td-body .dr-sec", { timeout: 30000 });
+  await page.waitForTimeout(300);
+  await shot("today_drawer");
+  await page.click("#td-close");
 
   // birth chart (auto-calculates on first visit)
   await go("chart");
@@ -57,6 +70,13 @@ const shots = process.argv[4];
   for (const sub of ["bhava", "jaimini", "upagraha", "tech"]) await page.click(`#chart-sub button[data-sub="${sub}"]`);
   await page.click('#chart-sub button[data-sub="overview"]');
   await page.click("#chart-form .save-profile");
+  await page.click("#prashna-btn");
+  await page.waitForTimeout(100);
+  await idle("chart-form");
+  console.log("prashna:", await page.$eval("#chart-form [name=name]", (e) => e.value));
+  await shot("prashna");
+  await page.evaluate(() => openProfileChart(profiles()[0]));
+  await idle("chart-form");
   await page.click('#tab-chart .style-toggle button[data-style="south"]');
   await shot("chart_south");
   await page.click('#tab-chart .style-toggle button[data-style="north"]');
@@ -93,8 +113,9 @@ const shots = process.argv[4];
   await shot("panchanga");
   await shot("panchanga_full", true);
 
-  await submit("calendar", "cal-form", "#cal-out .cal-cell[data-date]", () => page.fill("#cal-form [name=month]", "2027-10"));
-  await page.click('#cal-out .cal-cell[data-date="2027-10-29"]');
+  await submit("calendar", "cal-form", "#cal-out .cal-cell[data-date]", () => page.fill("#cal-form [name=month]", "2026-10"));
+  console.log("calendar moudhya-tagged days:", await page.$$eval("#cal-out .cal-cell .md-tag", (r) => r.length));
+  await page.click('#cal-out .cal-cell[data-date="2026-10-24"]');
   await shot("calendar", true);
 
   await submit("festivals", "fest-form", "#fest-out table", () => page.fill("#fest-form [name=year]", "2027"));
@@ -126,11 +147,21 @@ const shots = process.argv[4];
   await shot("match");
 
   await submit("muhurta", "muhurta-form", "#muhurta-out table", async () => {
-    await page.selectOption("#muhurta-form [name=activity]", "griha_pravesha");
-    await page.fill("#muhurta-form [name=start]", "2027-01-01");
-    await page.fill("#muhurta-form [name=end]", "2027-03-31");
+    await page.selectOption("#muhurta-form [name=activity]", "marriage");
+    await page.fill("#muhurta-form [name=start]", "2026-10-01");
+    await page.fill("#muhurta-form [name=end]", "2026-11-30");
+    await page.selectOption("#muhurta-form .mu-profile", "0");
+    await page.waitForFunction(() => document.querySelector("#muhurta-form [name=birth_nakshatra]").value !== "", null, { timeout: 60000 });
   });
+  console.log("   moudhya:", await page.$eval("#muhurta-out .md-status", (e) => e.innerText.replace(/\s+/g, " ")));
   await shot("muhurta");
+  await shot("muhurta_full", true);
+  await idle("muhurta-form");
+  await page.selectOption("#muhurta-form [name=activity]", "engagement");
+  await page.click('#muhurta-form .qchips button[data-days="90"]');
+  await page.waitForTimeout(100);
+  await idle("muhurta-form");
+  console.log("   engagement 3 months:", await page.$eval("#muhurta-hint", (e) => e.textContent));
 
   await submit("eclipses", "eclipse-form", "#eclipse-out .eclipse", async () => {
     await page.fill("#eclipse-form [name=start]", "2026-01-01");
@@ -164,6 +195,11 @@ const shots = process.argv[4];
   await page.selectOption('#settings-form [name=theme]', "light");
   await page.click('#settings-form button[type=submit]');
   await go("dashboard");
+  await page.selectOption("#today-profile", "0");
+  await page.waitForSelector("#dash-today .pers-top", { timeout: 60000 });
+  console.log("personal:", await page.$eval("#dash-today .pers-top", (e) => e.innerText.replace(/\s+/g, " ")));
+  await page.evaluate(() => document.querySelector("#dash-today .pers-top").scrollIntoView({ block: "center" }));
+  await shot("today_personal");
   await page.click("#gsearch");
   await page.fill("#gsearch", "hyd");
   await shot("search_popup");
@@ -186,6 +222,13 @@ const shots = process.argv[4];
   await page.setViewportSize({ width: 390, height: 844 });
   await go("dashboard");
   await shot("mobile_dashboard");
+  await page.evaluate(() => document.getElementById("today-section").scrollIntoView());
+  await shot("mobile_today");
+  await page.click("#today-btn");
+  await page.waitForSelector("#td-body .dr-sec");
+  await page.waitForTimeout(300);
+  await shot("mobile_drawer");
+  await page.click("#td-close");
   await go("chart");
   await shot("mobile_chart");
   await page.click("#mob-menu");

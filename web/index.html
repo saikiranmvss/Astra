@@ -99,6 +99,14 @@
     </div>
   </aside>
   <div class="scrim" id="scrim"></div>
+  <div class="drawer-scrim" id="drawer-scrim" hidden></div>
+  <aside class="drawer" id="today-drawer" aria-label="Today" hidden>
+    <div class="drawer-head">
+      <div><div class="k">Today</div><b id="td-date">&mdash;</b><small id="td-place"></small></div>
+      <div class="drawer-tools"><a class="btn ghost sm" href="#dashboard" data-tab-link="dashboard" id="td-full">Full view</a><button type="button" class="icon-btn" id="td-close" aria-label="Close"><svg class="ico"><use href="#i-x"/></svg></button></div>
+    </div>
+    <div class="drawer-body" id="td-body"><div class="skeleton"></div></div>
+  </aside>
 
   <div class="main" id="main">
     <header class="topbar" id="topbar">
@@ -110,6 +118,7 @@
         <div class="pop gs-pop" id="gs-pop" hidden></div>
       </div>
       <div class="top-actions">
+        <button class="today-top" id="today-btn" type="button" aria-label="Today at a glance"><svg class="ico"><use href="#i-sun"/></svg><span data-i18n="Today">Today</span></button>
         <button class="icon-btn" id="bell-btn" type="button" aria-label="Notifications"><svg class="ico"><use href="#i-bell"/></svg><span class="badge" id="bell-badge" hidden></span></button>
         <div class="pop bell-pop" id="bell-pop" hidden></div>
         <button class="avatar" id="avatar-btn" type="button" aria-label="Account menu">A</button>
@@ -153,6 +162,14 @@
           <a class="feat" href="#reports" data-tab-link="reports"><span class="fi c6"><svg class="ico"><use href="#i-reports"/></svg></span><span class="ft"><b>Reports</b><small>PDF reports &amp; analysis</small></span><svg class="ico chev"><use href="#i-right"/></svg></a>
         </div>
       </div>
+      <div class="section-head" id="today-section">
+        <div><h2>Today at a glance</h2><p class="sub" id="today-sub">Panchanga, every muhurta window, the sky right now and Moudhyami, calculated for your place</p></div>
+        <div class="head-tools">
+          <label class="bare inline-sel"><span>For</span><select id="today-profile" class="sel-sm" aria-label="Personal Tarabala for"></select></label>
+          <button type="button" class="btn ghost sm" id="today-refresh"><svg class="ico"><use href="#i-refresh"/></svg>Refresh</button>
+        </div>
+      </div>
+      <div id="dash-today"><div class="card"><div class="skeleton"></div><div class="skeleton"></div></div></div>
       <div class="dash-grid">
         <div class="card" id="dash-timings"><div class="card-head"><h3>Today&rsquo;s timings</h3><a class="link" href="#panchanga" data-tab-link="panchanga">Full Panchanga</a></div><div class="skeleton"></div></div>
         <div class="card" id="dash-fest"><div class="card-head"><h3>Upcoming festivals</h3><a class="link" href="#festivals" data-tab-link="festivals">Year view</a></div><div class="skeleton"></div></div>
@@ -177,7 +194,7 @@
       <div class="seg-row"><div class="seg"><button type="button" class="on">Single Chart</button><button type="button" data-go="match">Compare Charts</button><button type="button" data-go="profiles">Saved Charts</button></div></div>
       <div class="chart-layout">
         <form id="chart-form" class="card form hform">
-          <div class="card-head"><h3>Birth Details</h3></div>
+          <div class="card-head"><h3>Birth Details</h3><button type="button" class="btn ghost sm" id="prashna-btn" title="Chart for this moment at your default place (Prashna)"><svg class="ico"><use href="#i-refresh"/></svg>This moment</button></div>
           <label>Saved profile <select class="profile-pick" data-target="chart"></select></label>
           <label><span data-i18n="Name">Name</span> <input name="name" placeholder="Optional"></label>
           <label>Date of Birth <input name="date" type="date" required value="1998-12-10"></label>
@@ -329,6 +346,7 @@
           <label class="bare"><span class="sr" data-i18n="Date">Date</span><input name="date" type="date" required></label>
           <button type="button" class="icon-btn day-step" data-step="1" aria-label="Next day"><svg class="ico"><use href="#i-right"/></svg></button>
           <button type="button" class="btn ghost sm today-btn" data-i18n="Today">Today</button>
+          <button type="button" class="btn ghost sm" id="panch-tomorrow">Tomorrow</button>
         </div>
         <div class="place-slot" data-variant="compact"></div>
         <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="panch-hint"></span></div>
@@ -347,6 +365,7 @@
           <button type="button" class="icon-btn month-step" data-step="-1" aria-label="Previous month"><svg class="ico"><use href="#i-left"/></svg></button>
           <label class="bare"><span class="sr" data-i18n="Month">Month</span><input name="month" type="month" required></label>
           <button type="button" class="icon-btn month-step" data-step="1" aria-label="Next month"><svg class="ico"><use href="#i-right"/></svg></button>
+          <button type="button" class="btn ghost sm" id="cal-this">This month</button>
         </div>
         <label class="bare">Show
           <select name="show">
@@ -373,6 +392,7 @@
           <label>Year <input name="year" type="number" min="1900" max="2140" required></label>
           <label>Filter text <input name="q" placeholder="e.g. Ekadashi, Navami"></label>
         </div>
+        <div class="qchips"><span class="qk">Quick</span><button type="button" data-fyear="0">This year</button><button type="button" data-fyear="1">Next year</button><button type="button" data-fyear="-1">Last year</button></div>
         <div class="field-title" data-i18n="Categories">Categories</div>
         <div class="checks" id="fest-cats"></div>
         <div class="place-slot" data-variant="compact"></div>
@@ -390,26 +410,56 @@
         <div class="grid">
           <label><span data-i18n="Activity">Activity</span>
             <select name="activity">
-              <option value="general">Any auspicious work</option>
-              <option value="marriage">Marriage (Vivaha)</option>
-              <option value="griha_pravesha">House warming (Griha Pravesha)</option>
-              <option value="vehicle">Vehicle purchase</option>
-              <option value="business">Business / shop opening</option>
-              <option value="property">Property / land purchase</option>
-              <option value="travel">Travel / journey start</option>
-              <option value="namakarana">Naming ceremony (Namakarana)</option>
-              <option value="annaprashana">First feeding (Annaprashana)</option>
-              <option value="vidyarambha">Start of education (Aksharabhyasa)</option>
-              <option value="upanayana">Thread ceremony (Upanayana)</option>
-              <option value="medical">Start medical treatment</option>
+              <optgroup label="General">
+                <option value="general">Any auspicious work</option>
+                <option value="homam">Homam / vratam / puja start</option>
+              </optgroup>
+              <optgroup label="Marriage &amp; family">
+                <option value="engagement">Engagement (Nischitartham / Vagdanam)</option>
+                <option value="marriage">Marriage (Vivaha)</option>
+                <option value="seemantham">Seemantham / Pumsavana (baby shower)</option>
+                <option value="namakarana">Naming ceremony (Namakarana)</option>
+                <option value="annaprashana">First feeding (Annaprashana)</option>
+                <option value="chaula">First haircut / tonsure (Chaula, Mundan)</option>
+                <option value="karnavedha">Ear piercing (Karnavedha)</option>
+                <option value="vidyarambha">Start of education (Aksharabhyasa)</option>
+                <option value="upanayana">Thread ceremony (Upanayana)</option>
+              </optgroup>
+              <optgroup label="Home &amp; property">
+                <option value="bhoomi_puja">Foundation laying / Bhoomi puja (Gruhaarambha)</option>
+                <option value="griha_pravesha">House warming (Griha Pravesha)</option>
+                <option value="property">Property / land purchase</option>
+                <option value="pratishtha">Deity installation (Devata Pratishtha)</option>
+              </optgroup>
+              <optgroup label="Work &amp; money">
+                <option value="business">Business / shop opening</option>
+                <option value="job">Joining a job / new position</option>
+                <option value="agreement">Signing agreements / financial deals</option>
+                <option value="jewellery">Gold / jewellery purchase</option>
+                <option value="vehicle">Vehicle purchase</option>
+                <option value="agriculture">Sowing / start of farming</option>
+              </optgroup>
+              <optgroup label="Travel &amp; health">
+                <option value="travel">Travel / journey start</option>
+                <option value="medical">Start medical treatment</option>
+              </optgroup>
             </select>
           </label>
           <label><span data-i18n="From">From</span> <input name="start" type="date" required></label>
           <label><span data-i18n="To">To</span> <input name="end" type="date" required></label>
+          <label>Moudhyami (Guru / Shukra combust)
+            <select name="moudhya">
+              <option value="auto">Avoid when the tradition requires (recommended)</option>
+              <option value="always">Always avoid</option>
+              <option value="ignore">Ignore</option>
+            </select>
+          </label>
           <label>Minimum window (minutes) <input name="min_minutes" type="number" value="24" min="5" step="1"></label>
+          <label>Person (fills Tarabala / Chandrabala) <select class="mu-profile"><option value="">Nobody (skip personal checks)</option></select></label>
           <label>Birth nakshatra (Tarabala) <select name="birth_nakshatra" class="opt-nak"><option value="">Not used</option></select></label>
           <label>Birth Moon rashi (Chandrabala) <select name="birth_rashi" class="opt-rashi"><option value="">Not used</option></select></label>
         </div>
+        <div class="qchips" data-quick="range"><span class="qk">Quick</span><button type="button" data-days="0">Today</button><button type="button" data-days="0" data-offset="1">Tomorrow</button><button type="button" data-days="6">This week</button><button type="button" data-days="29">Next 30 days</button><button type="button" data-days="90">Next 3 months</button><button type="button" data-days="180">Next 6 months</button></div>
         <label class="toggle-row inline"><input type="checkbox" name="include_night" class="sw"> Include night windows</label>
         <div class="place-slot" data-variant="compact"></div>
         <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Find muhurtas</button><span class="hint" id="muhurta-hint"></span></div>
@@ -432,6 +482,7 @@
           <label class="chk"><input type="checkbox" name="lunar" checked> Lunar</label>
           <label class="chk"><input type="checkbox" name="visible_only"> Only visible here</label>
         </div>
+        <div class="qchips" data-quick="range"><span class="qk">Quick</span><button type="button" data-year="0">This year</button><button type="button" data-days="365">Next 12 months</button><button type="button" data-days="1826">Next 5 years</button><button type="button" data-days="3652">Next 10 years</button><button type="button" data-days="-3652" data-past="1">Past 10 years</button></div>
         <div class="place-slot" data-variant="compact"></div>
         <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="eclipse-hint"></span></div>
       </form>
@@ -459,6 +510,7 @@
             </select>
           </label>
         </div>
+        <div class="qchips" data-quick="range"><span class="qk">Quick</span><button type="button" data-days="0">Today</button><button type="button" data-days="0" data-offset="1">Tomorrow</button><button type="button" data-days="6">This week</button><button type="button" data-month="0">This month</button><button type="button" data-days="90">Next 3 months</button></div>
         <div class="field-title" data-i18n="Categories">Categories</div>
         <div class="checks" id="search-cats"></div>
         <div class="field-title">Planets <small>for ingress, stations, combustion, conjunctions</small></div>
@@ -612,6 +664,7 @@
 <script src="i18n.js"></script>
 <script src="app.js"></script>
 <script src="tabs.js"></script>
+<script src="today.js"></script>
 <script src="pages.js"></script>
 </body>
 </html>

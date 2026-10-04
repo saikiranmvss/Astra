@@ -200,6 +200,13 @@ def panchanga(p):
         float(p.get("tz_minutes", 330)), p.get("ayanamsa", "lahiri"),
         p.get("sunrise_profile", "upper_limb_refraction"),
     )
+    from . import moudhya
+    from .localtime import LocalTime
+    lt = LocalTime.from_params(p)
+    noon = lt.midnight(y, m, d) + 0.5
+    mp = moudhya.periods(noon - 1.0, noon + 1.0, p.get("ayanamsa", "lahiri"),
+                         float(p.get("moudhya_padding_days", 0) or 0), lt.iso)
+    out["moudhya"] = moudhya.status(mp, noon)
     out["engine"] = "astro_engine " + ENGINE_VERSION
     out["kind"] = "panchanga"
     out["reproducibility"] = REPRODUCIBILITY
@@ -226,7 +233,11 @@ def month_calendar(p):
         d = localize_day(dr, rec, moon=True, i=i)
         d["festivals"] = by_date.get(rec["date"], [])
         days.append(d)
+    from . import moudhya
+    mp = moudhya.periods(dr.midnights[0], dr.midnights[-1], dr.model,
+                         float(p.get("moudhya_padding_days", 0) or 0), dr.fmt)
     return {"kind": "calendar", "year": y, "month": m, "days": days,
+            "moudhya": [moudhya._strip(x) for x in mp],
             "profile": {"months": "Amanta", "sunrise": dr.profile, "ayanamsa": dr.model},
             "compute_seconds": round(time.time() - t_start, 3)}
 
@@ -244,6 +255,95 @@ def upcoming(p):
     fest = sorted((f for f in fest if f["date"] >= start), key=lambda f: f["date"])
     return {"kind": "upcoming", "start": start, "days": days, "festivals": fest,
             "compute_seconds": round(time.time() - t_start, 3)}
+
+
+def today(p):
+    """Everything for one day at one place: panchanga, the sky now, moudhyami,
+    the muhurta windows open today and the next good window for every activity."""
+    from . import moudhya, muhurta, transits
+    from .localtime import LocalTime
+    from .series import Series
+    t_start = time.time()
+    y, m, d = _parse_date(p["date"])
+    lat, lon = float(p["lat"]), float(p["lon"])
+    elev = float(p.get("elevation", 0.0))
+    model = p.get("ayanamsa", "lahiri")
+    node = p.get("node", "true")
+    lt = LocalTime.from_params(p)
+    now_jd = p.get("now_jd_utc")
+    if now_jd is None:
+        now_jd = time.time() / 86400.0 + 2440587.5
+    now_jd = float(now_jd)
+
+    pan = panchanga(p)
+
+    ctx = ChartContext(model)
+    sky = compute_chart(Instant.from_utc_jd(now_jd), lat, lon, elev, model, node, ctx=ctx)
+    planets = []
+    for k in T.GRAHAS + ["Uranus", "Neptune", "Pluto"]:
+        g = sky["grahas"][k]
+        planets.append({"planet": k, "longitude": g["longitude"], "rashi": g["rashi"],
+                        "nakshatra": g["nakshatra"], "retrograde": g["retrograde"],
+                        "combust": g.get("combust"), "speed": g["speed_deg_per_day"]})
+
+    t0, t1 = now_jd - 5.0, now_jd + 400.0
+    ms = Series(t0 - moudhya.PAD_SPAN, t1 + moudhya.PAD_SPAN, ["Sun", "Jupiter", "Venus"],
+                step=2.0, model=model)
+    pad = float(p.get("moudhya_padding_days", 0) or 0)
+    mperiods = moudhya.periods(t0, t1, model, pad, lt.iso, series=ms)
+
+    days = int(p.get("muhurta_days", 30))
+    ey, em, ed = calendar(julian_day(y, m, d) + days - 1)[:3]
+    scan, best = muhurta.best_by_activity(p, (y, m, d), (int(ey), int(em), int(ed)))
+    date_s = "%04d-%02d-%02d" % (y, m, d)
+
+    class _Day(object):
+        pass
+    one = _Day()
+    one.dr = scan.dr
+    one.days = [x for x in scan.days if x[1]["date"] == date_s]
+    open_today = []
+    general_rejected = {}
+    for key in muhurta.ORDER:
+        _k, act, rules = muhurta.rules_for(p, key)
+        wins, rej, _b = muhurta.evaluate(one, rules, float(p.get("min_minutes", 24)))
+        if key == "general":
+            general_rejected = rej
+        if wins:
+            open_today.append({"activity": key, "label": act["label"], "windows": wins})
+
+    personal = None
+    natal = p.get("natal")
+    if natal and natal.get("moon_sign") and natal.get("nakshatra"):
+        moon_nak = sky["grahas"]["Moon"]["nakshatra"]["index"] - 1
+        moon_sign = sign_of(sky["grahas"]["Moon"]["longitude"])
+        nm = int(natal["moon_sign"]) - 1
+        tnum, tname, good = muhurta.tara(int(natal["nakshatra"]) - 1, moon_nak)
+        house = muhurta.chandra_house(nm, moon_sign)
+        personal = {
+            "name": natal.get("name"),
+            "tarabala": {"number": tnum, "name": tname, "good": good},
+            "chandrabala": {"house": house, "good": house in muhurta.GOOD_CHANDRA},
+            "chandrashtama": house == 8,
+            "gochara": [dict(v, planet=k) for k, v in transits.gochara(
+                nm, {r["planet"]: sign_of(r["longitude"]) for r in planets[:9]}).items()],
+        }
+
+    return {
+        "kind": "today",
+        "engine": "astro_engine " + ENGINE_VERSION,
+        "date": date_s,
+        "now": lt.iso(now_jd),
+        "panchanga": pan,
+        "sky": {"lagna": sky["lagna"], "planets": planets, "time": lt.iso(now_jd)},
+        "moudhya": {"status": moudhya.status(mperiods, now_jd, ms),
+                    "periods": [moudhya._strip(x) for x in mperiods],
+                    "rule": "Jupiter within 11 deg / Venus within 10 deg (8 deg retrograde) of the Sun"},
+        "muhurta": {"days": days, "open_today": open_today, "by_activity": best,
+                    "general_rejected_minutes": general_rejected},
+        "personal": personal,
+        "compute_seconds": round(time.time() - t_start, 3),
+    }
 
 
 def match(p):
@@ -288,4 +388,9 @@ def dispatch(kind, params):
         return eclipses.search(params)
     if kind == "upcoming":
         return upcoming(params)
+    if kind == "today":
+        return today(params)
+    if kind == "moudhya":
+        from . import moudhya
+        return moudhya.search(params)
     raise ValueError("unknown request kind: %s" % kind)

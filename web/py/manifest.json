@@ -16,6 +16,7 @@
     "astro_engine/jaimini.py",
     "astro_engine/localtime.py",
     "astro_engine/matching.py",
+    "astro_engine/moudhya.py",
     "astro_engine/muhurta.py",
     "astro_engine/nutation_data.py",
     "astro_engine/panchanga.py",
@@ -32,5 +33,5 @@
     "astro_engine/vec.py",
     "astro_engine/yogas.py"
   ],
-  "version": "57bb510909ae"
+  "version": "0e51a952e219"
 }

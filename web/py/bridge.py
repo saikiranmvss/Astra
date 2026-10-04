@@ -45,6 +45,10 @@ def _span(kind, params):
     if not jds:
         return None
     a, b = min(jds) - 60.0, max(jds) + 60.0
+    if kind in ("panchanga", "calendar", "muhurta", "moudhya", "today"):
+        a, b = a - 90.0, b + 90.0
+    if kind == "today":
+        b += 400.0
     if kind == "transits":
         b = max(b, min(jds) + float(params.get("years", 100)) * 365.25 + 60.0,
                 max(jds) + 5 * 365.25 + 90.0)

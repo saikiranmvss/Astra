@@ -32,7 +32,11 @@ CASES = [
                       birth_lon=BIRTH["lon"])),
     ("match", {"groom": BIRTH, "bride": dict(BIRTH, date="2000-03-15", time="07:30:00")}),
     ("muhurta", dict(HYD, start="2027-01-01", end="2027-03-31", activity="marriage")),
+    ("muhurta", dict(HYD, start="2026-10-01", end="2026-12-31", activity="griha_pravesha")),
     ("eclipses", dict(HYD, start="2026-01-01", end="2030-12-31")),
+    ("upcoming", dict(HYD, start="2026-10-04")),
+    ("moudhya", dict(HYD, start="2024-01-01", end="2027-12-31")),
+    ("today", dict(HYD, date="2026-10-04", natal={"moon_sign": 5, "nakshatra": 11})),
 ]
 dump = sys.argv[1] if len(sys.argv) > 1 else None
 if dump:

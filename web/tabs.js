@@ -63,7 +63,13 @@ function renderCalendar(r) {
   const lead = r.days[0].weekday;
   let cells = "";
   for (let i = 0; i < lead; i++) cells += '<div class="cal-cell empty"></div>';
+  const mperiods = r.moudhya || [];
+  const inMoudhya = (iso) => mperiods.filter((p) => (!p.start || p.start <= iso) && (!p.end || iso < p.end));
+  let monthHasMoudhya = false;
   for (const d of r.days) {
+    const md = inMoudhya(d.sunrise || d.date + "T06:00:00");
+    if (md.length) monthHasMoudhya = true;
+    const mdTags = md.map((p) => `<span class="md-tag ${p.planet === "Jupiter" ? "g" : "s"}" title="${esc(p.name)}">${p.planet === "Jupiter" ? "GM" : "SM"}</span>`).join("");
     let body = "";
     if (show === "tithi") {
       body = `<div class="ct">${esc(trTithi("", d.tithi.name))} <span class="hint">${hm(d.tithi.end)}</span></div>
@@ -77,7 +83,7 @@ function renderCalendar(r) {
       body = `<div>\u263e\u2191 ${hm(d.moonrise)}</div><div>\u263e\u2193 ${hm(d.moonset)}</div>`;
     }
     cells += `<div class="cal-cell${d.date === today ? " today" : ""}${d.date === calSel ? " sel" : ""}${d.weekday === 0 ? " sun" : ""}" data-date="${d.date}">
-      <div class="cd"><b>${+d.date.slice(8)}</b><span class="paksha ${d.tithi.paksha === "Shukla" ? "sk" : "kr"}">${esc(tr("paksha", d.tithi.paksha)).slice(0, LANG === "en" ? 1 : 2)}</span>${tithiMark(d)}</div>${body}</div>`;
+      <div class="cd"><b>${+d.date.slice(8)}</b><span class="paksha ${d.tithi.paksha === "Shukla" ? "sk" : "kr"}">${esc(tr("paksha", d.tithi.paksha)).slice(0, LANG === "en" ? 1 : 2)}</span>${mdTags}${tithiMark(d)}</div>${body}</div>`;
   }
   const months = [...new Set(r.days.map((d) => trMonth((d.month.adhika ? "Adhika " : "") + d.month.name)))].join(" / ");
   const head = [0, 1, 2, 3, 4, 5, 6].map((w) => `<div class="cal-h">${esc(varaShort(w))}</div>`).join("");
@@ -87,7 +93,7 @@ function renderCalendar(r) {
     <div class="card-head"><div class="cal-head"><span class="mt">${esc(mlabel)}</span><span class="ms">${esc(months)} \u00b7 Amanta</span></div>
       <div class="row-actions"><button type="button" class="ghost" id="cal-ics">${ico("panchanga")}Festivals .ics</button><button type="button" class="ghost" id="cal-csv">${ico("download")}CSV</button><button type="button" class="ghost" id="cal-json">JSON</button></div></div>
     <div class="cal">${head}${cells}</div>
-    <p class="hint">Tithi and nakshatra shown are those at sunrise, with their end time. Click a day for the full details.</p>
+    <p class="hint">Tithi and nakshatra shown are those at sunrise, with their end time. Click a day for the full details.${monthHasMoudhya ? ` <span class="md-tag g">GM</span> Guru moudhyami, <span class="md-tag s">SM</span> Shukra moudhyami (planet within its combustion orb of the Sun): ${mperiods.map((p) => `${esc(p.short)} ${p.start ? esc(dateLabel(p.start.slice(0, 10))) : "\u2026"} \u2013 ${p.end ? esc(dateLabel(p.end.slice(0, 10))) : "\u2026"}`).join("; ")}.` : ""}</p>
   </div>
   <div id="cal-day"></div>`;
   document.querySelectorAll(".cal-cell[data-date]").forEach((c) => c.addEventListener("click", () => {
@@ -586,7 +592,7 @@ const muhurtaForm = bindForm("muhurta-form", "muhurta-out", "muhurta-hint", asyn
   const start = f.get("start"), end = f.get("end");
   const tz = rangeTz(pl, start, end);
   const params = Object.assign({ start, end, activity: f.get("activity"), lat: pl.lat, lon: pl.lon,
-    include_night: !!f.get("include_night"), min_minutes: +f.get("min_minutes") || 24 }, tz, calc());
+    include_night: !!f.get("include_night"), min_minutes: +f.get("min_minutes") || 24, moudhya: f.get("moudhya") || "auto" }, tz, calc());
   if (f.get("birth_nakshatra")) params.birth_nakshatra = +f.get("birth_nakshatra");
   if (f.get("birth_rashi")) params.birth_rashi = +f.get("birth_rashi");
   const r = await call("muhurta", params);
@@ -614,6 +620,7 @@ function renderMuhurta(r) {
       <tr><td class="hint">Always avoided</td><td class="wrap">${esc((r.always_avoided || []).join(", "))}</td></tr>
     </table>
   </div>
+  ${muhurtaMoudhyaHTML(r)}
   <div class="card">
     <div class="row-actions"><span class="hint" style="margin-right:auto">${r.count} windows \u00b7 ${esc(r.status)}</span>
       <select id="mu-sort" style="max-width:180px"><option value="date">Sort by date</option><option value="score"${muhurtaSort === "score" ? " selected" : ""}>Sort by score</option></select>
@@ -622,7 +629,7 @@ function renderMuhurta(r) {
     ${list.map((w) => `<tr><td><b>${esc(dateLabel(w.date))}</b></td><td>${esc(tr("vara", w.vara))}</td><td><b>${hm(w.start)} \u2013 ${tmRel(w.end, w.date)}</b></td><td>${Math.round(w.minutes)}</td>
       <td>${esc(LANG === "en" ? w.tithi : trTithi(w.tithi.split(" ")[0], w.tithi.split(" ").slice(1).join(" ")))}</td><td>${esc(w.nakshatras.map((x) => tr("nakshatra", x)).join(", "))}</td>
       <td>${esc(tr("yoga", w.yoga))} / ${esc(tr("karana", w.karana))}</td><td>${esc(w.lagnas.map((x) => tr("rashi", x)).join(", "))}</td>
-      <td>${esc(w.tarabala || "\u2014")} / ${w.chandrabala_house ?? "\u2014"}</td><td title="${esc(w.reasons.join("; "))}"><b>${w.score}</b> <span class="hint small">${esc(w.reasons.join("; "))}</span></td></tr>`).join("") || '<tr><td colspan="10" class="hint">No window satisfies all rules in this range. Try a longer range, include night, or lower the minimum window.</td></tr>'}
+      <td>${esc(w.tarabala || "\u2014")} / ${w.chandrabala_house ?? "\u2014"}</td><td title="${esc(w.reasons.join("; "))}"><b>${w.score}</b> <span class="hint small">${esc(w.reasons.join("; "))}</span></td></tr>`).join("") || `<tr><td colspan="10" class="hint">No window satisfies all rules in this range.${r.suggestion ? " " + esc(r.suggestion.text) : " Try a longer range, include night, or lower the minimum window."}</td></tr>`}
     </table></div>
   </div>`;
   document.getElementById("mu-sort").onchange = (ev) => { muhurtaSort = ev.target.value; renderMuhurta(r); };

@@ -98,6 +98,7 @@ async function loadDashboard() {
   } catch (e) {
     document.getElementById("today-rows").innerHTML = `<div class="today-wait">${esc(e.message)}</div>`;
   }
+  try { await loadToday(true); } catch (e) { console.error(e); }
   try {
     const u = await call("upcoming", Object.assign({ start: date, days: 45 }, base, tzRange(p.tz, date, addDays(date, 45)), calc()));
     dashData.upcoming = u;
@@ -150,7 +151,7 @@ document.getElementById("dash-saved").addEventListener("click", (e) => {
   const p = profiles().find((x) => x.name === b.dataset.name);
   if (p) openProfileChart(p);
 });
-rerender.dashboard = () => { if (dashData.panch) { renderToday(dashData.panch); renderDashTimings(dashData.panch); } if (dashData.upcoming) renderDashFest(dashData.upcoming); };
+rerender.dashboard = () => { if (dashData.panch) { renderToday(dashData.panch); renderDashTimings(dashData.panch); } if (dashData.upcoming) renderDashFest(dashData.upcoming); renderTodayAll(); };
 
 /* ---------- notifications ---------- */
 function bellItems() {
@@ -161,6 +162,16 @@ function bellItems() {
     const state = nowIso < rk.start ? "today" : nowIso < rk.end ? "now" : "was";
     out.push({ icon: "info", cls: "bad", title: `${t("Rahu kala")} ${state === "now" ? "is on now" : state === "was" ? "has passed today" : "today"}`, sub: `${hm(rk.start)} \u2013 ${hm(rk.end)} \u00b7 ${dashData.place.name || ""}`, go: "panchanga" });
     if (r.muhurta.abhijit) out.push({ icon: "sun", cls: "good", title: `${t("Abhijit")} muhurta`, sub: `${hm(r.muhurta.abhijit.start)} \u2013 ${hm(r.muhurta.abhijit.end)}`, go: "panchanga" });
+  }
+  if (typeof todayData !== "undefined" && todayData) {
+    const md = todayData.moudhya.status;
+    ["Jupiter", "Venus"].forEach((b) => {
+      const s = md[b];
+      if (s.combust && s.current) out.push({ icon: "eclipse", cls: "bad", title: `${s.name} is on`, sub: `Ceremonies postponed until ${s.current.end ? dateLabel(s.current.end) : "\u2026"}`, go: "muhurta" });
+      else if (s.next && s.next.start <= addDays(today, 30)) out.push({ icon: "eclipse", cls: "ecl", title: `${s.name} starts ${dateLabel(s.next.start)}`, sub: `Until ${dateLabel(s.next.end)} \u00b7 ${Math.round(s.next.days)} days`, go: "muhurta" });
+    });
+    const gen = todayData.muhurta.by_activity.find((x) => x.activity === "general");
+    if (gen && gen.next) out.push({ icon: "muhurta", cls: "good", title: "Next auspicious muhurta", sub: `${dateLabel(gen.next.date)} ${hm(gen.next.start)} \u2013 ${hm(gen.next.end)}`, go: "dashboard" });
   }
   if (dashData.upcoming) {
     const soon = dashData.upcoming.festivals.filter((f) => f.date >= today && f.date <= addDays(today, 7) && f.category !== "vrata").slice(0, 4);

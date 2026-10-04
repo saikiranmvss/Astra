@@ -200,7 +200,120 @@ ACTIVITIES = {
         "avoid_tithis": sorted(RIKTA | {30}),
         "lagnas": None,
     },
+    "engagement": {
+        "label": "Engagement (Nischitartham / Vagdanam)",
+        "nakshatras": _naks("Rohini", "Mrigashira", "Magha", "Uttara Phalguni", "Hasta", "Swati",
+                            "Anuradha", "Mula", "Uttara Ashadha", "Shravana", "Dhanishtha",
+                            "Uttara Bhadrapada", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {8, 23, 30}),
+        "lagnas": None,
+        "avoid_months": ["Ashadha", "Bhadrapada", "Pushya"],
+    },
+    "seemantham": {
+        "label": "Seemantham / Pumsavana (baby shower)",
+        "nakshatras": _naks("Rohini", "Mrigashira", "Punarvasu", "Pushya", "Uttara Phalguni",
+                            "Hasta", "Mula", "Uttara Ashadha", "Shravana", "Uttara Bhadrapada",
+                            "Revati"),
+        "weekdays": [0, 2, 4],
+        "avoid_tithis": sorted(RIKTA | {8, 23, 30}),
+        "lagnas": None,
+    },
+    "chaula": {
+        "label": "First haircut / tonsure (Chaula, Mundan)",
+        "nakshatras": _naks("Ashwini", "Mrigashira", "Punarvasu", "Pushya", "Hasta", "Chitra",
+                            "Swati", "Jyeshtha", "Shravana", "Dhanishtha", "Shatabhisha", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {6, 8, 21, 23, 30}),
+        "lagnas": None,
+    },
+    "karnavedha": {
+        "label": "Ear piercing (Karnavedha)",
+        "nakshatras": _naks("Ashwini", "Mrigashira", "Punarvasu", "Pushya", "Hasta", "Chitra",
+                            "Anuradha", "Shravana", "Dhanishtha", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {8, 23, 30}),
+        "lagnas": None,
+    },
+    "bhoomi_puja": {
+        "label": "Foundation laying / Bhoomi puja (Gruhaarambha)",
+        "nakshatras": _naks("Rohini", "Mrigashira", "Pushya", "Uttara Phalguni", "Hasta", "Chitra",
+                            "Swati", "Anuradha", "Uttara Ashadha", "Dhanishtha", "Shatabhisha",
+                            "Uttara Bhadrapada", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {8, 23, 30}),
+        "lagnas": [2, 5, 8, 11, 3, 6, 9, 12],
+        "avoid_months": ["Chaitra", "Jyeshtha", "Ashadha", "Bhadrapada", "Ashvayuja", "Magha"],
+    },
+    "pratishtha": {
+        "label": "Deity installation (Devata Pratishtha)",
+        "nakshatras": _naks("Ashwini", "Rohini", "Mrigashira", "Punarvasu", "Pushya",
+                            "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Anuradha",
+                            "Uttara Ashadha", "Shravana", "Dhanishtha", "Uttara Bhadrapada", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {8, 23, 30}),
+        "lagnas": [2, 5, 8, 11],
+        "avoid_months": ["Ashadha", "Bhadrapada", "Pushya"],
+    },
+    "job": {
+        "label": "Joining a job / new position",
+        "nakshatras": _naks("Ashwini", "Rohini", "Mrigashira", "Punarvasu", "Pushya",
+                            "Uttara Phalguni", "Hasta", "Chitra", "Anuradha", "Uttara Ashadha",
+                            "Shravana", "Uttara Bhadrapada", "Revati"),
+        "weekdays": [0, 1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {30}),
+        "lagnas": None,
+    },
+    "jewellery": {
+        "label": "Gold / jewellery purchase",
+        "nakshatras": _naks("Ashwini", "Rohini", "Punarvasu", "Pushya", "Uttara Phalguni", "Hasta",
+                            "Chitra", "Swati", "Anuradha", "Uttara Ashadha", "Shravana",
+                            "Dhanishtha", "Uttara Bhadrapada", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {30}),
+        "lagnas": None,
+    },
+    "agreement": {
+        "label": "Signing agreements / financial deals",
+        "nakshatras": _naks("Ashwini", "Rohini", "Mrigashira", "Pushya", "Uttara Phalguni", "Hasta",
+                            "Chitra", "Anuradha", "Uttara Ashadha", "Shravana",
+                            "Uttara Bhadrapada", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {8, 23, 30}),
+        "lagnas": [2, 5, 8, 11],
+    },
+    "agriculture": {
+        "label": "Sowing / start of farming",
+        "nakshatras": _naks("Ashwini", "Rohini", "Mrigashira", "Punarvasu", "Pushya",
+                            "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Anuradha", "Mula",
+                            "Uttara Ashadha", "Shravana", "Dhanishtha", "Shatabhisha",
+                            "Uttara Bhadrapada", "Revati"),
+        "weekdays": [1, 3, 4, 5],
+        "avoid_tithis": sorted(RIKTA | {30}),
+        "lagnas": None,
+    },
+    "homam": {
+        "label": "Homam / vratam / puja start",
+        "nakshatras": _naks("Ashwini", "Rohini", "Mrigashira", "Punarvasu", "Pushya",
+                            "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Anuradha",
+                            "Uttara Ashadha", "Shravana", "Dhanishtha", "Shatabhisha",
+                            "Uttara Bhadrapada", "Revati"),
+        "weekdays": None,
+        "avoid_tithis": sorted(RIKTA | {30}),
+        "lagnas": None,
+    },
 }
+
+# Samskaras and ceremonies traditionally postponed while Guru or Shukra is combust.
+MOUDHYA_ACTIVITIES = {"marriage", "engagement", "griha_pravesha", "upanayana", "vidyarambha",
+                      "annaprashana", "chaula", "karnavedha", "bhoomi_puja", "pratishtha",
+                      "general"}
+for _k, _v in ACTIVITIES.items():
+    _v["moudhya"] = _k in MOUDHYA_ACTIVITIES
+ORDER = ["general", "marriage", "engagement", "griha_pravesha", "bhoomi_puja", "vehicle",
+         "business", "property", "jewellery", "agreement", "job", "travel", "namakarana",
+         "annaprashana", "chaula", "karnavedha", "vidyarambha", "upanayana", "seemantham",
+         "pratishtha", "homam", "agriculture", "medical"]
 
 
 class FastLagna(object):
@@ -245,31 +358,37 @@ class FastLagna(object):
         return out
 
 
-def find(p):
-    """Muhurta windows for an activity over a date range."""
-    started = time.time()
-    first = tuple(int(x) for x in p["start"].split("-"))
-    last = tuple(int(x) for x in p["end"].split("-"))
-    act = ACTIVITIES.get(p.get("activity", "general"), ACTIVITIES["general"])
-    rules = dict(act)
-    for key in ("nakshatras", "weekdays", "avoid_tithis", "lagnas", "avoid_months"):
-        if key in p and p[key] is not None:
-            rules[key] = p[key]
-    include_night = bool(p.get("include_night", False))
-    min_minutes = float(p.get("min_minutes", 24))
-    birth_nak = p.get("birth_nakshatra")      # 1..27
-    birth_rashi = p.get("birth_rashi")        # 1..12
-    dr = DayRange(p, first, last)
-    if len(dr.dates) > 190:
-        raise ValueError("Muhurta search is limited to about 6 months per query.")
-    lat, lon = dr.site[0], dr.site[1]
-    results = []
-    for i, rec in enumerate(dr.days):
+class Scan(object):
+    """Activity-independent segmentation of every day in a range.
+
+    Each segment is a stretch with constant tithi, nakshatra, yoga, karana,
+    Moon sign and lagna, tagged with the classical blocks (Rahu kala, ...)
+    and the Guru/Shukra moudhyami periods it falls in.
+    """
+
+    def __init__(self, p, first, last, include_night=False, max_days=190):
+        from . import moudhya
+        self.dr = dr = DayRange(p, first, last)
+        if len(dr.dates) > max_days:
+            raise ValueError("Muhurta search is limited to about 6 months per query.")
+        self.include_night = include_night
+        pad = float(p.get("moudhya_padding_days", 0) or 0)
+        t0, t1 = dr.midnights[0], dr.midnights[-1] + 1.0
+        self.moudhya = moudhya.periods(t0, t1, dr.model, pad, dr.fmt)
+        self.days = []
+        for i, rec in enumerate(dr.days):
+            segs = self._segments(i, rec, moudhya)
+            if segs is not None:
+                self.days.append((i, rec, segs))
+
+    def _segments(self, i, rec, moudhya):
+        dr = self.dr
+        lat, lon = dr.site[0], dr.site[1]
         r, s_, nr = dr.rises[i], dr.sets[i], dr.rises[i + 1]
         if r is None or s_ is None or nr is None:
-            continue
+            return None
         wd = rec["weekday"]
-        a, b = r, (nr if include_night else s_)
+        a, b = r, (nr if self.include_night else s_)
         cuts = {a, b}
         blocks = []
         for key in ("rahu_kala", "yamaganda", "gulika"):
@@ -287,6 +406,10 @@ def find(p):
                 amrita.append(w)
         for _, x, y in blocks:
             cuts.update([x, y])
+        for mp in self.moudhya:
+            for x in (mp["start_jd"], mp["end_jd"]):
+                if x is not None:
+                    cuts.add(x)
         for bnd in (dr.tithi, dr.nak, dr.yoga, dr.karana, dr.moon_sign):
             for _k, x, y in bnd.between(a, b):
                 if x is not None:
@@ -302,72 +425,154 @@ def find(p):
             if y - x < 1e-6:
                 continue
             mid = (x + y) / 2.0
-            ti = dr.tithi.at(mid)[0]
-            ni = dr.nak.at(mid)[0]
-            yi = dr.yoga.at(mid)[0]
-            kn = karana_name(dr.karana.at(mid)[0])
-            mi = dr.moon_sign.at(mid)[0]
-            li = int(fl.sid(mid) // 30.0)
-            fails = []
-            if rules.get("nakshatras") and (ni + 1) not in rules["nakshatras"]:
-                fails.append("nakshatra")
-            if rules.get("weekdays") is not None and wd not in rules["weekdays"]:
-                fails.append("weekday")
-            if (ti + 1) in (rules.get("avoid_tithis") or []):
-                fails.append("tithi")
-            if T.YOGAS[yi] in BAD_YOGAS:
-                fails.append("yoga")
-            if kn == "Vishti":
-                fails.append("vishti karana")
-            if month and (month["adhika"] or month["name"] in (rules.get("avoid_months") or [])):
-                fails.append("month")
-            if rules.get("lagnas") and (li + 1) not in rules["lagnas"]:
-                fails.append("lagna")
-            for nm, bx, by in blocks:
-                if bx <= mid < by:
-                    fails.append(nm)
-            tb = cb = None
-            if birth_nak:
-                tnum, tname, good = tara(int(birth_nak) - 1, ni)
-                tb = tname
-                if not good:
-                    fails.append("tarabala")
-            if birth_rashi:
-                h = chandra_house(int(birth_rashi) - 1, mi)
-                cb = h
-                if h not in GOOD_CHANDRA:
-                    fails.append("chandrabala")
-            segs.append({"a": x, "b": y, "ok": not fails, "fails": fails, "tithi": ti,
-                         "nak": ni, "yoga": yi, "karana": kn, "lagna": li, "moon": mi,
-                         "tara": tb, "chandra": cb,
-                         "amrita": any(u <= mid < v for u, v in amrita)})
-        # merge passing segments
+            segs.append({
+                "a": x, "b": y, "wd": wd, "month": month,
+                "tithi": dr.tithi.at(mid)[0], "nak": dr.nak.at(mid)[0], "yoga": dr.yoga.at(mid)[0],
+                "karana": karana_name(dr.karana.at(mid)[0]), "moon": dr.moon_sign.at(mid)[0],
+                "lagna": int(fl.sid(mid) // 30.0),
+                "blocks": [nm for nm, bx, by in blocks if bx <= mid < by],
+                "moudhya": moudhya.blocked(self.moudhya, mid),
+                "amrita": any(u <= mid < v for u, v in amrita),
+            })
+        return segs
+
+
+def rules_for(p, activity=None):
+    key = activity or p.get("activity", "general")
+    act = ACTIVITIES.get(key, ACTIVITIES["general"])
+    rules = dict(act)
+    if activity is None:
+        for k in ("nakshatras", "weekdays", "avoid_tithis", "lagnas", "avoid_months"):
+            if k in p and p[k] is not None:
+                rules[k] = p[k]
+    mode = p.get("moudhya", "auto")
+    rules["check_moudhya"] = (mode == "always") or (mode == "auto" and act["moudhya"])
+    return key, act, rules
+
+
+def _fails(sg, rules, birth_nak, birth_rashi):
+    fails = []
+    if rules.get("nakshatras") and (sg["nak"] + 1) not in rules["nakshatras"]:
+        fails.append("nakshatra")
+    if rules.get("weekdays") is not None and sg["wd"] not in rules["weekdays"]:
+        fails.append("weekday")
+    if (sg["tithi"] + 1) in (rules.get("avoid_tithis") or []):
+        fails.append("tithi")
+    if T.YOGAS[sg["yoga"]] in BAD_YOGAS:
+        fails.append("yoga")
+    if sg["karana"] == "Vishti":
+        fails.append("vishti karana")
+    m = sg["month"]
+    if m and (m["adhika"] or m["name"] in (rules.get("avoid_months") or [])):
+        fails.append("month")
+    if rules.get("lagnas") and (sg["lagna"] + 1) not in rules["lagnas"]:
+        fails.append("lagna")
+    fails.extend(sg["blocks"])
+    if rules.get("check_moudhya"):
+        fails.extend(nm.lower() for nm in sg["moudhya"])
+    tb = cb = None
+    if birth_nak:
+        _tn, tb, good = tara(int(birth_nak) - 1, sg["nak"])
+        if not good:
+            fails.append("tarabala")
+    if birth_rashi:
+        cb = chandra_house(int(birth_rashi) - 1, sg["moon"])
+        if cb not in GOOD_CHANDRA:
+            fails.append("chandrabala")
+    return fails, tb, cb
+
+
+def evaluate(scan, rules, min_minutes=24.0, birth_nak=None, birth_rashi=None):
+    """Passing windows plus minutes rejected per reason."""
+    dr = scan.dr
+    results = []
+    rejected = {}
+    blocked_days = []
+    for i, rec, segs in scan.days:
+        day_moudhya = False
         run = None
         for sg in segs + [None]:
-            if sg is not None and sg["ok"]:
-                if run is None:
-                    run = {"start": sg["a"], "end": sg["b"], "parts": [sg]}
-                else:
-                    run["end"] = sg["b"]
-                    run["parts"].append(sg)
-                continue
+            if sg is not None:
+                fails, tb, cb = _fails(sg, rules, birth_nak, birth_rashi)
+                sg = dict(sg, tara=tb, chandra=cb)
+                mins = (sg["b"] - sg["a"]) * 1440.0
+                for f in set(fails):
+                    rejected[f] = rejected.get(f, 0.0) + mins
+                if rules.get("check_moudhya") and sg["moudhya"]:
+                    day_moudhya = True
+                if not fails:
+                    if run is None:
+                        run = {"start": sg["a"], "end": sg["b"], "parts": [sg]}
+                    else:
+                        run["end"] = sg["b"]
+                        run["parts"].append(sg)
+                    continue
             if run is not None:
                 if (run["end"] - run["start"]) * 1440.0 >= min_minutes:
                     results.append(_window(dr, i, rec, run))
                 run = None
+        if day_moudhya:
+            blocked_days.append(rec["date"])
+    return results, {k: round(v) for k, v in sorted(rejected.items(), key=lambda kv: -kv[1])}, blocked_days
+
+
+def find(p):
+    """Muhurta windows for an activity over a date range."""
+    from . import moudhya
+    started = time.time()
+    first = tuple(int(x) for x in p["start"].split("-"))
+    last = tuple(int(x) for x in p["end"].split("-"))
+    key, act, rules = rules_for(p)
+    scan = Scan(p, first, last, bool(p.get("include_night", False)))
+    results, rejected, blocked_days = evaluate(
+        scan, rules, float(p.get("min_minutes", 24)), p.get("birth_nakshatra"), p.get("birth_rashi"))
+    suggestion = None
+    if rules["check_moudhya"] and blocked_days:
+        ends = [mp for mp in scan.moudhya if mp["end_jd"] is not None]
+        last_end = max(ends, key=lambda mp: mp["end_jd"]) if ends else None
+        if last_end:
+            suggestion = {"clear_from": last_end["end"],
+                          "text": "%s ends %s; search from that date for more windows."
+                                  % (last_end["name"], last_end["end"][:10])}
     return {
         "kind": "muhurta",
-        "activity": p.get("activity", "general"),
+        "start": p["start"], "end": p["end"],
+        "activity": key,
         "label": act["label"],
         "rules": {k: rules.get(k) for k in ("nakshatras", "weekdays", "avoid_tithis", "lagnas",
                                             "avoid_months")},
         "always_avoided": ["Rahu kala", "Yamaganda", "Gulika kala", "Durmuhurta", "Varjyam",
-                           "Vishti (Bhadra) karana", "inauspicious yogas", "adhika masa"],
+                           "Vishti (Bhadra) karana", "inauspicious yogas", "adhika masa"]
+                          + (["Guru & Shukra moudhyami"] if rules["check_moudhya"] else []),
+        "moudhya": {"checked": rules["check_moudhya"], "mode": p.get("moudhya", "auto"),
+                    "traditional_for_activity": act["moudhya"],
+                    "periods": [moudhya._strip(mp) for mp in scan.moudhya],
+                    "blocked_days": blocked_days,
+                    "rule": "Jupiter within 11 deg / Venus within 10 deg (8 deg retrograde) of the Sun"},
+        "rejected_minutes": rejected,
+        "suggestion": suggestion,
         "count": len(results),
         "windows": results,
         "compute_seconds": round(time.time() - started, 3),
-        "status": "TRADITIONAL rules on CALCULATED panchanga",
+        "status": "TRADITIONAL rules on CALCULATED panchanga and planetary combustion",
     }
+
+
+def best_by_activity(p, first, last, keys=None):
+    """For each activity: the next passing window and the best-scored one in the range."""
+    scan = Scan(p, first, last, False, max_days=95)
+    out = []
+    for key in (keys or ORDER):
+        _k, act, rules = rules_for(p, key)
+        wins, rejected, blocked = evaluate(scan, rules, float(p.get("min_minutes", 24)),
+                                           p.get("birth_nakshatra"), p.get("birth_rashi"))
+        best = max(wins, key=lambda w: (w["score"], w["minutes"])) if wins else None
+        out.append({"activity": key, "label": act["label"], "count": len(wins),
+                    "next": wins[0] if wins else None, "best": best,
+                    "moudhya_checked": rules["check_moudhya"],
+                    "moudhya_blocked_days": len(blocked),
+                    "top_reason": next(iter(rejected), None)})
+    return scan, out
 
 
 def _window(dr, i, rec, run):
