@@ -34,11 +34,11 @@ document.getElementById("explore-btn").addEventListener("click", (e) => {
 
 /* ---------- global search ---------- */
 const PAGES = [
-  ["dashboard", "Dashboard", "home today overview", "dashboard"], ["chart", "Birth Chart", "kundali rasi horoscope jataka lagna planets", "chart"],
+  ["dashboard", "Dashboard", "home today overview", "dashboard"], ["chart", "Birth Chart", "kundali rasi horoscope jataka lagna planets name letter namakshara baby name syllable", "chart"],
   ["dashas", "Dashas", "vimshottari yogini ashtottari chara periods mahadasha antardasha", "dashas"],
   ["vargas", "Vargas", "divisional navamsha d9 dashamsha d10 d60", "vargas"], ["yogas", "Yogas & Strength", "doshas shadbala ashtakavarga raja yoga kuja", "yogas"],
   ["transits", "Transits", "gochara sade sati saturn ingress chandrashtama", "transits"], ["match", "Matching", "compatibility ashtakoota porutham marriage compare", "match"],
-  ["panchanga", "Daily Panchanga", "tithi nakshatra yoga karana rahu kala sunrise", "panchanga"], ["calendar", "Monthly Calendar", "month calendar panchanga", "panchanga"],
+  ["panchanga", "Daily Panchanga", "tithi nakshatra yoga karana rahu kala sunrise name letters today moudhyami", "panchanga"], ["calendar", "Monthly Calendar", "month calendar panchanga", "panchanga"],
   ["festivals", "Festivals (Yearly)", "festival ekadashi vrata sankranti jayanti", "festival"], ["muhurta", "Muhurta", "auspicious time marriage griha pravesha vehicle", "muhurta"],
   ["eclipses", "Eclipses", "grahana solar lunar", "eclipse"], ["search", "Event Search", "find events ingress retrograde station conjunction", "search"],
   ["reports", "Reports", "pdf print report", "reports"], ["profiles", "Saved Charts", "profiles people places", "saved"],
@@ -541,7 +541,7 @@ function chartReport(r) {
       <h2>Birth details</h2>${kv([["Name", esc(r.input.name || "\u2014")], ["Date", esc(longDate(r.input.date))], ["Time", esc(r.input.time) + " (UTC" + fmtOffset(r.input.tz_minutes) + ")"],
         ["Place", esc(r.input.place || "\u2014")], ["Coordinates", r.input.lat.toFixed(4) + ", " + r.input.lon.toFixed(4)], ["Ayanamsa", esc(r.profile.ayanamsa)], ["Rahu / Ketu", String(r.profile.node) === "mean" ? "Mean node" : "True (osculating) node"]])}
       <h2>Panchanga at birth</h2>${kv([[t("Tithi"), esc(trTithi(bp.tithi.paksha, bp.tithi.name))], [t("Nakshatra"), esc(tr("nakshatra", r.chart.grahas.Moon.nakshatra.name)) + " pada " + r.chart.grahas.Moon.nakshatra.pada],
-        [t("Yoga"), esc(tr("yoga", bp.yoga.name))], [t("Karana"), esc(tr("karana", bp.karana.name))], [t("Vara"), esc(tr("vara", bp.vara.name))], [t("Month"), esc(tr("month", bp.lunar_month.name))]])}
+        [t("Yoga"), esc(tr("yoga", bp.yoga.name))], [t("Karana"), esc(tr("karana", bp.karana.name))], [t("Vara"), esc(tr("vara", bp.vara.name))], [t("Month"), esc(tr("month", bp.lunar_month.name))]].concat(r.namakshara ? [["Name letter", esc(sylAll(r.namakshara))]] : []))}
     </div><div class="rep-charts"><div><h3>Rasi (D1)</h3>${chartFor(r, "D1", s.chart_style)}</div><div><h3>Navamsha (D9)</h3>${chartFor(r, "D9", s.chart_style)}</div></div></section>
     <section><h2>Planetary positions</h2>${chartDetailsTable(r, "D1")}</section>
     <section><h2>Current Vimshottari periods</h2>${kv(chain.map((n, i) => [["Maha", "Antar", "Pratyantar", "Sukshma", "Prana"][i], esc(n.label) + " \u00b7 " + fmtRange(n, i >= 2)]))}</section>

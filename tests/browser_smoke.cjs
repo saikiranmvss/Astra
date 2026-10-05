@@ -53,6 +53,7 @@ const shots = process.argv[4];
   await shot("dashboard");
   await shot("dashboard_full", true);
   await (await page.$("#dash-today")).screenshot({ path: path.join(shots, "today_section.png") });
+  await (await page.$("#today-nama")).screenshot({ path: path.join(shots, "today_nama.png") });
 
   // Today drawer
   await page.click("#today-btn");
@@ -66,6 +67,8 @@ const shots = process.argv[4];
   await page.waitForSelector("#chart-visual svg.kundali, #chart-out .error-box", { timeout: 60000 });
   await idle("chart-form");
   (await page.$$eval("#chart-out .stat", (els) => els.map((e) => e.innerText.replace(/\s+/g, " ")))).forEach((s) => console.log("   ", s));
+  console.log("name letter:", await page.$eval("#chart-out .nama-big", (e) => e.innerText.replace(/\s+/g, " ")));
+  await (await page.$("#chart-out .nama-card")).screenshot({ path: path.join(shots, "nama_card.png") });
   await shot("chart");
   for (const sub of ["bhava", "jaimini", "upagraha", "tech"]) await page.click(`#chart-sub button[data-sub="${sub}"]`);
   await page.click('#chart-sub button[data-sub="overview"]');
@@ -110,6 +113,7 @@ const shots = process.argv[4];
   // panchanga
   await submit("panchanga", "panch-form", "#panch-out .pl-row", () => page.fill("#panch-form [name=date]", "2027-01-08"));
   await page.waitForSelector("#panch-upcoming .fl-row, #panch-upcoming .fest-today, #panch-upcoming p", { timeout: 60000 });
+  console.log("panchanga name letters:", await page.$$eval("#panch-out .nama-row", (r) => r.map((x) => x.querySelector(".ns").textContent + " " + x.querySelector(".nt").textContent).join(" | ")));
   await shot("panchanga");
   await shot("panchanga_full", true);
 

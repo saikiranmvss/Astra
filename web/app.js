@@ -76,6 +76,46 @@ const GLYPH = { Sun: "\u2609", Moon: "\u263D", Mars: "\u2642", Mercury: "\u263F"
 const PCOLOR = { Sun: "#f59e0b", Moon: "#64748b", Mars: "#ef4444", Mercury: "#10b981", Jupiter: "#eab308", Venus: "#ec4899",
   Saturn: "#6366f1", Rahu: "#475569", Ketu: "#a16207", Uranus: "#0ea5e9", Neptune: "#3b82f6", Pluto: "#7c3aed", Lagna: "#7c6cff" };
 const glyph = (k) => `<span class="glyph" style="--pc:${PCOLOR[k] || "#7c6cff"}">${GLYPH[k] || ""}</span>`;
+/* name syllable (namakshara) in the script of the current language */
+const sylOf = (e) => (!e ? "" : LANG === "te" ? e.telugu : LANG === "en" ? e.latin : e.devanagari);
+const sylAll = (e) => `${e.latin} \u00b7 ${e.devanagari} \u00b7 ${e.telugu}`;
+const sylAlt = (e) => (e.alternates || []).map((a) => `${a.latin} (${a.devanagari} \u00b7 ${a.telugu}) in ${a.note}`).join("; ");
+function namaRows(list, now, day) {
+  return `<div class="nama-rows">${list.map((e) => {
+    const on = now && e.start <= now && now < e.end;
+    return `<div class="nama-row${on ? " on" : ""}" title="${esc(sylAlt(e))}"><span class="ns">${esc(sylOf(e))}</span>
+      <span class="nb2"><b>${esc(sylAll(e))}</b><small>${esc(tr("nakshatra", e.nakshatra))} pada ${e.pada} \u00b7 ${esc(tr("rashi", e.rashi))}</small></span>
+      <span class="nt">${tmRel(e.start, day)} \u2013 ${tmRel(e.end, day)}${on ? '<em>now</em>' : ""}</span></div>`;
+  }).join("")}</div>`;
+}
+function namaStrip(list, now, day) {
+  return `<div class="nama-strip">${list.map((e) => {
+    const on = now && e.start <= now && now < e.end;
+    return `<div class="nama-chip${on ? " on" : ""}" title="${esc(sylAlt(e))}"><span class="ns">${esc(sylOf(e))}</span>
+      <b>${esc(sylAll(e))}</b><small>${esc(tr("nakshatra", e.nakshatra))} \u00b7 pada ${e.pada}</small>
+      <span class="nt">${tmRel(e.start, day)} \u2013 ${tmRel(e.end, day)}</span>${on ? '<em>now</em>' : ""}</div>`;
+  }).join("")}</div>`;
+}
+function namaCard(nm) {
+  const hrs = (m) => (m == null ? "?" : m >= 60 ? (m / 60).toFixed(1) + " h" : Math.round(m) + " min");
+  const chip = (e, on) => `<span class="sy${on ? " on" : ""}" title="${esc(e.latin)}"><b>${esc(sylOf(e))}</b><small>${esc(LANG === "en" ? e.devanagari + " " + e.telugu : e.latin)}</small></span>`;
+  const nb = nm.neighbour;
+  return `
+  <div class="card nama-card">
+    <div class="card-head"><h3>Name letter (Namakshara)</h3><span class="hint">from the Moon's nakshatra pada at birth</span></div>
+    <div class="nama-main">
+      <div class="nama-big"><span class="ns">${esc(sylOf(nm))}</span><div><b>${esc(sylAll(nm))}</b><small>${esc(tr("nakshatra", nm.nakshatra))} pada ${nm.pada} \u00b7 ${esc(tr("rashi", nm.rashi))} rashi</small></div></div>
+      <div class="nama-sets">
+        <div><h4 class="mini-title">${esc(tr("nakshatra", nm.nakshatra))} padas 1\u20134</h4><div class="sy-row">${nm.nakshatra_syllables.map((e, i) => chip(e, i + 1 === nm.pada)).join("")}</div></div>
+        <div><h4 class="mini-title">${esc(tr("rashi", nm.rashi))} rashi letters</h4><div class="sy-row">${nm.rashi_syllables.map((e) => chip(e, e.nakshatra === nm.nakshatra && e.pada === nm.pada)).join("")}</div></div>
+      </div>
+    </div>
+    <p class="nama-note">The Moon was in this pada from <b>${esc(dt(nm.pada_start))}</b> to <b>${esc(dt(nm.pada_end))}</b>; birth is ${hrs(nm.minutes_after_start)} after it began and ${hrs(nm.minutes_before_end)} before it ends.</p>
+    ${nb ? `<p class="nama-warn">${ico("info")}Birth is only ${hrs(nb.minutes)} from the ${nb.side} pada (${esc(tr("nakshatra", nb.nakshatra))} ${nb.pada} = <b>${esc(sylAll(nb))}</b>). Check the birth time; a few minutes earlier or later changes the letter.</p>` : ""}
+    ${nm.alternates ? `<p class="hint">Regional variant: ${esc(sylAlt(nm))}.</p>` : ""}
+    <p class="hint">${esc(nm.rule)}. The Moon position is calculated; the syllable table is traditional.</p>
+  </div>`;
+}
 const pdot = (k, big) => `<span class="pdot-i${big ? " big" : ""}" style="--pc:${PCOLOR[k] || "#7c6cff"}">${GLYPH[k] || esc(String(k).slice(0, 2))}</span>`;
 
 /* group a label's caption nodes into one element so the layout keeps them on one line */
@@ -842,6 +882,7 @@ function renderChart(r) {
   const moonNakMargin = Math.min(moon.nakshatra.degrees_into, 13.3333333 - moon.nakshatra.degrees_into);
   const warnLagna = minsTo(lagMargin) < 10;
   const cd = r.chara_dasha;
+  const nm = r.namakshara;
   const st = r.sun_times || {};
   const sec = (name, html) => `<div data-sec="${name}"${name === chartSub ? "" : " hidden"}>${html}</div>`;
   renderChartVisual(r);
@@ -854,6 +895,7 @@ function renderChart(r) {
       <div class="stat"><div class="k">${t("Lagna")}</div><div class="v">${esc(rashiName(L.rashi))} ${dms(L.rashi.degrees_in_sign, false)}</div><div class="s">${esc(nakName(L.nakshatra))} p${L.nakshatra.pada}${warnLagna ? ' \u00b7 <span class="warn">near sign edge</span>' : ""}</div></div>
       <div class="stat"><div class="k">Janma ${t("Nakshatra")}</div><div class="v">${esc(nakName(moon.nakshatra))}</div><div class="s">pada ${moon.nakshatra.pada} \u00b7 lord ${esc(tr("graha", moon.nakshatra.lord))}</div></div>
       <div class="stat"><div class="k">Janma ${t("Rashi")}</div><div class="v">${esc(rashiName(moon.rashi))}</div><div class="s">Moon ${dms(moon.rashi.degrees_in_sign, false)}</div></div>
+      ${nm ? `<div class="stat"><div class="k">Name letter</div><div class="v">${esc(sylOf(nm))} <span class="sv-all">${esc(sylAll(nm))}</span></div><div class="s">${esc(tr("nakshatra", nm.nakshatra))} pada ${nm.pada}${nm.near_boundary ? ' \u00b7 <span class="warn">near pada edge</span>' : ""}</div></div>` : ""}
       <div class="stat"><div class="k">D10 / D9 lagna</div><div class="v">${esc(tr("rashi", r.vargas.D10.positions.Lagna.sign))} / ${esc(tr("rashi", r.vargas.D9.positions.Lagna.sign))}</div><div class="s">Dashamsha / Navamsha</div></div>
       <div class="stat"><div class="k">Vimshottari now</div><div class="v">${esc(cur || "\u2014")}</div><div class="s">Maha \u203a Antar \u203a Pratyantar</div></div>
       <div class="stat"><div class="k">Chara dasha now</div><div class="v">${esc((cd.current || []).map((x) => tr("rashi", x)).join(" \u203a ") || "\u2014")}</div><div class="s">${esc(cd.direction)} order</div></div>
@@ -878,7 +920,7 @@ function renderChart(r) {
         return `<tr><td>${pdot(k)}<b>${esc(tr("graha", k))}</b></td><td>${signDeg(x.longitude)}</td><td>${esc(nakName(x.nakshatra))}</td><td>${x.nakshatra.pada}</td><td>${esc(tr("graha", x.nakshatra.lord))}</td><td>${x.house_whole_sign}${x.house_sripati !== x.house_whole_sign ? ` <span class="hint">(bhava ${x.house_sripati})</span>` : ""}</td><td>${x.speed_deg_per_day.toFixed(4)}</td><td>${state}</td></tr>`;
       }).join("")}
     </table></div>
-  </div>`;
+  </div>${nm ? namaCard(nm) : ""}`;
 
   const into = moon.nakshatra.degrees_into;
   const trace = `
@@ -891,7 +933,7 @@ Ayanamsa         A = ${dms(c.ayanamsa.true)}   (mean ${dms(c.ayanamsa.mean)}, nu
 Moon sidereal    \u03bb\u2212A = ${dms(moon.longitude)}
 Nakshatra        N = floor(${dms(moon.longitude)} / 13\u00b020\u2032) + 1 = ${moon.nakshatra.index}  \u2192 ${esc(moon.nakshatra.name)}
 Inside           ${dms(into)}  \u2192 pada floor(${dms(into)} / 3\u00b020\u2032) + 1 = ${moon.nakshatra.pada}${moonNakMargin < 0.5 ? "   \u26a0 within " + dms(moonNakMargin, false) + " of a nakshatra edge" : ""}
-Dasha balance    ${esc(r.dasha.starting_lord)}: Y \u00d7 (1 \u2212 x/800\u2032) = ${r.dasha.balance_years.toFixed(4)} years  (x = ${r.dasha.elapsed_arcmin.toFixed(3)}\u2032)
+${nm ? `Namakshara       pada ${(nm.nakshatra_index - 1) * 4 + nm.pada} of 108 (${esc(nm.nakshatra)} ${nm.pada})  \u2192 ${esc(sylAll(nm))}   (Moon in this pada ${esc(nm.pada_start ? nm.pada_start.replace("T", " ") : "?")} \u2192 ${esc(nm.pada_end ? nm.pada_end.replace("T", " ") : "?")})\n` : ""}Dasha balance    ${esc(r.dasha.starting_lord)}: Y \u00d7 (1 \u2212 x/800\u2032) = ${r.dasha.balance_years.toFixed(4)} years  (x = ${r.dasha.elapsed_arcmin.toFixed(3)}\u2032)
 GAST             ${c.gast_hours.toFixed(6)} h     RAMC ${dms(c.ramc)}     \u03b5 ${dms(c.obliquity_true)}
 Lagna            tropical ${dms(L.tropical_longitude)} \u2212 A = ${signDeg(L.longitude)}   (moves ${(L.speed_deg_per_min * 60).toFixed(2)}\u2032 per minute of time)</div>
   </div>`;
@@ -1015,6 +1057,7 @@ function renderPanchanga(r) {
         <div class="moon-body">${moonSVG(ti.index || 1, 76, elong)}<div><b>${esc(tr("paksha", r.lunar_month.paksha))} ${t("Paksha")}</b><div>${esc(trTithi(r.tithi[0].paksha, r.tithi[0].name))}</div><small>Illumination ${illum.toFixed(1)}% \u00b7 elongation ${elong.toFixed(1)}\u00b0</small></div></div>
       </div>
       ${r.moudhya ? `<div class="card"><div class="card-head"><h3>Moudhyami</h3><span class="hint">Guru &amp; Shukra combustion</span></div>${moudhyaRows(r.moudhya)}</div>` : ""}
+      ${r.namakshara && r.namakshara.length ? `<div class="card"><div class="card-head"><h3>Name letters</h3><span class="hint">for babies born this day</span></div>${namaRows(r.namakshara, nowLocalIso(r.tz_minutes), r.date)}<p class="hint">Moon's nakshatra pada from sunrise to the next sunrise; each pada gives the first syllable of the name.</p></div>` : ""}
       <div class="card">
         <div class="card-head"><h3>Lunar Month &amp; Festivals</h3></div>
         <div class="month-pill"><span><b>${esc(tr("month", r.lunar_month.name))}${r.lunar_month.adhika ? " (Adhika)" : ""}</b> \u00b7 ${esc(tr("paksha", r.lunar_month.paksha))}</span><small>${esc(tr("ritu", r.lunar_month.ritu))} \u00b7 ${esc(tr("samvatsara", r.year.samvatsara))} \u00b7 Shaka ${r.year.shaka}</small></div>

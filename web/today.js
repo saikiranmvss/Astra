@@ -343,6 +343,7 @@ function renderTodayDash(r) {
       <div class="card"><div class="card-head"><h3>All timings today</h3><a class="link" href="#panchanga" data-tab-link="panchanga">Full Panchanga</a></div>${timingsTable(r, now)}</div>
       <div class="card"><div class="card-head"><h3>Planets now</h3><a class="link" href="#transits" data-tab-link="transits">Transits</a></div>${planetsTable(r)}</div>
     </div>
+    ${(r.panchanga.namakshara || []).length ? `<div class="card" id="today-nama"><div class="card-head"><h3>Name letters today</h3><span class="hint">first syllable of the name for a baby born in each window (Moon's nakshatra pada)</span></div>${namaStrip(r.panchanga.namakshara, now, r.date)}</div>` : ""}
     <div class="card" id="today-muhurta"><div class="card-head"><h3>Muhurtas</h3><a class="link" href="#muhurta" data-tab-link="muhurta">Muhurta finder</a></div>${muhurtaToday(r)}</div>
     <div class="today-grid2">
       <div class="card"><div class="card-head"><h3>Moudhyami</h3><span class="hint">Guru &amp; Shukra combustion, next 12 months</span></div>${moudhyaCard(r)}</div>
@@ -387,6 +388,7 @@ function renderDrawer() {
     <div class="dr-sec"><h4>Muhurtas open today</h4>${open.length ? open.slice(0, 8).map((o) => `<div class="dr-row"><span>${esc(o.label)}</span><b>${o.windows.map((w) => hm(w.start) + "\u2013" + hm(w.end)).join(", ")}</b><em><button type="button" class="link-btn" data-act="${o.activity}">find</button></em></div>`).join("")
       : `<p class="hint">None today (${esc(Object.keys(r.muhurta.general_rejected_minutes || {}).slice(0, 2).map(reasonText).join(", "))}).</p>`}</div>
     <div class="dr-sec"><h4>Moudhyami</h4>${moudhyaRows(r.moudhya.status)}</div>
+    ${(pan.namakshara || []).length ? `<div class="dr-sec"><h4>Name letters today</h4>${namaRows(pan.namakshara, now, pan.date)}</div>` : ""}
     ${r.personal ? `<div class="dr-sec"><h4>For ${esc(r.personal.name || r._natal.name || "you")}</h4>${row("Tarabala", esc(r.personal.tarabala.name) + (r.personal.tarabala.good ? " \u2713" : " \u2717"), "")}${row("Chandrabala", r.personal.chandrabala.house + (r.personal.chandrabala.good ? " \u2713" : " \u2717"), "")}</div>` : ""}
     ${fest.length ? `<div class="dr-sec"><h4>Festivals this week</h4>${fest.map((f) => `<div class="dr-row"><span>${esc(dateLabel(f.date))}</span><b>${esc(trFest(f))}</b><em></em></div>`).join("")}</div>` : ""}
     <div class="dr-actions"><a class="btn primary" href="#panchanga" data-tab-link="panchanga">${ico("panchanga")}Panchanga</a><a class="btn ghost" href="#muhurta" data-tab-link="muhurta">${ico("muhurta")}Muhurta</a></div>`;

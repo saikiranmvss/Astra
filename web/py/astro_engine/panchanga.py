@@ -6,7 +6,7 @@ import math
 
 from . import tables as T
 from .chart import ChartContext, norm360
-from .constants import (DEG2RAD, MOON_RADIUS_KM, NAKSHATRA_SPAN, RAD2DEG,
+from .constants import (DEG2RAD, MOON_RADIUS_KM, NAKSHATRA_SPAN, PADA_SPAN, RAD2DEG,
                         SUN_RADIUS_KM, AU_KM)
 from .positions import apparent_gcrs, equatorial_of_date
 from .rootfind import angle_crossing, secant_crossing, solve
@@ -270,6 +270,9 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
         n["lord"] = T.nakshatra_lord(n["index"] - 1)
     yoga_list = fmt_intervals(yogas, lambda i: T.YOGAS[i])
     karana_list = fmt_intervals(karanas, karana_name)
+    from . import namakshara
+    padas = eng.intervals_between(eng.moon_sid, PADA_SPAN, ref, day_end, 0.25, 108)
+    nama_list = namakshara.day_list(padas, lambda j: _local(j, tz_minutes))
 
     # weekday of the civil date (the Hindu day runs sunrise to sunrise)
     weekday = int(math.floor(julian_day(year, month, day) + 0.5) + 1) % 7
@@ -365,6 +368,7 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
         "nakshatra": nak_list,
         "yoga": yoga_list,
         "karana": karana_list,
+        "namakshara": nama_list,
         "sun_sidereal_at_sunrise": sun_sid,
         "moon_sidereal_at_sunrise": moon_sid,
         "surya_rashi": T.RASHIS[int(sun_sid // 30.0)],

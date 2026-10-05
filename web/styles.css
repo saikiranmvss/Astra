@@ -961,6 +961,42 @@ table.tt .small { font-size: 11px; }
 .gc.good { background: color-mix(in srgb, var(--good) 10%, transparent); border-color: color-mix(in srgb, var(--good) 35%, var(--line)); color: var(--good); }
 .gc.bad { background: color-mix(in srgb, var(--bad) 8%, transparent); border-color: color-mix(in srgb, var(--bad) 30%, var(--line)); color: var(--bad); }
 .gc.warn { background: color-mix(in srgb, var(--warn) 10%, transparent); border-color: color-mix(in srgb, var(--warn) 35%, var(--line)); color: var(--warn); }
+.ns { display: inline-grid; place-items: center; min-width: 46px; height: 46px; padding: 0 8px; border-radius: 12px; background: var(--primary-soft); color: var(--primary); font: 700 20px var(--font); flex-shrink: 0; }
+.nama-rows { display: flex; flex-direction: column; }
+.nama-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 9px 0; border-top: 1px solid var(--line-3); }
+.nama-row:first-child { border-top: 0; }
+.nama-row .ns { min-width: 40px; height: 40px; font-size: 18px; }
+.nama-row .nb2 b { display: block; font-size: 13px; }
+.nama-row .nb2 small { display: block; font-size: 11.5px; color: var(--muted); }
+.nama-row .nt { font-size: 12px; font-weight: 600; color: var(--text-2); text-align: right; font-variant-numeric: tabular-nums; }
+.nama-row .nt em, .nama-chip em { display: block; font-style: normal; font-size: 11px; color: var(--primary); }
+.nama-row.on .ns, .nama-chip.on .ns { background: var(--grad); color: #fff; }
+.nama-strip { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.nama-chip { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg-2); min-width: 0; }
+.nama-chip.on { border-color: color-mix(in srgb, var(--primary) 50%, var(--line)); background: var(--primary-soft); }
+.nama-chip b { font-size: 13px; margin-top: 6px; }
+.nama-chip small { font-size: 11.5px; color: var(--muted); }
+.nama-chip .nt { font-size: 12px; font-weight: 600; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.nama-chip em { position: absolute; top: 12px; right: 12px; }
+.sv-all { font-size: 12px; font-weight: 500; color: var(--muted); }
+.nama-main { display: grid; grid-template-columns: minmax(220px, 300px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.nama-big { display: flex; align-items: center; gap: 14px; padding: 16px; border-radius: 14px; background: var(--bg-2); border: 1px solid var(--line-3); }
+.nama-big .ns { min-width: 72px; height: 72px; font-size: 32px; border-radius: 18px; background: var(--grad); color: #fff; }
+.nama-big b { display: block; font-size: 16px; }
+.nama-big small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.nama-sets .mini-title { margin: 0 0 8px; font-size: 12.5px; color: var(--text-2); }
+.nama-sets > div + div { margin-top: 14px; }
+.sy-row { display: flex; flex-wrap: wrap; gap: 6px; }
+.sy { display: inline-flex; flex-direction: column; align-items: center; min-width: 48px; padding: 6px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--card); }
+.sy b { font-size: 15px; }
+.sy small { font-size: 10.5px; color: var(--muted); white-space: nowrap; }
+.sy.on { background: var(--primary-soft); border-color: color-mix(in srgb, var(--primary) 45%, var(--line)); color: var(--primary); }
+.nama-note { margin: 14px 0 6px; font-size: 13px; color: var(--text-2); }
+.nama-warn { display: flex; align-items: flex-start; gap: 8px; margin: 8px 0; padding: 10px 12px; border-radius: 10px; background: #fff7ed; border: 1px solid #fed7aa; color: #9a3412; font-size: 13px; }
+.nama-warn .ico { width: 16px; height: 16px; flex-shrink: 0; margin-top: 1px; }
+[data-theme="dark"] .nama-warn { background: rgba(249, 115, 22, .12); border-color: rgba(249, 115, 22, .3); color: #fdba74; }
+@media (max-width: 900px) { .nama-main { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 560px) { .nama-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } .nama-row { gap: 8px; } }
 .qchips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 14px; }
 .qchips .qk { font-size: 12px; font-weight: 600; color: var(--muted); margin-right: 2px; }
 .qchips button { height: 30px; padding: 0 12px; border-radius: 99px; border: 1px solid var(--line-2); background: var(--card); color: var(--text-2); font: 600 12.5px var(--font); cursor: pointer; transition: border-color .15s, color .15s, background .15s; }

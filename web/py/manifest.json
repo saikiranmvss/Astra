@@ -18,6 +18,7 @@
     "astro_engine/matching.py",
     "astro_engine/moudhya.py",
     "astro_engine/muhurta.py",
+    "astro_engine/namakshara.py",
     "astro_engine/nutation_data.py",
     "astro_engine/panchanga.py",
     "astro_engine/positions.py",
@@ -33,5 +34,5 @@
     "astro_engine/vec.py",
     "astro_engine/yogas.py"
   ],
-  "version": "0e51a952e219"
+  "version": "18d14d0a62e8"
 }

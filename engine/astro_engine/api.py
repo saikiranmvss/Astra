@@ -115,6 +115,11 @@ def birth_chart(p):
     bp = _birth_panchanga(eng, jd_utc, site, tz, profile)
     lm = eng.lunar_month(jd_utc)
     bp["lunar_month"] = {"name": lm["name"], "adhika": lm["adhika"], "system": "Amanta"}
+    from . import namakshara
+    from .constants import PADA_SPAN
+    _, pada_a, pada_b = eng.interval(eng.moon_sid, PADA_SPAN, jd_utc, 0.25)
+    nama = namakshara.for_birth(sid["Moon"], jd_utc, pada_a, pada_b,
+                                lambda j: format_jd(j + tz / 1440.0))
 
     # sun times around the birth (Hindu day runs sunrise to sunrise)
     ly, lmo, ld = calendar(jd_utc + tz / 1440.0)[:3]
@@ -173,6 +178,7 @@ def birth_chart(p):
         "yogas": yg,
         "upagrahas": up,
         "birth_panchanga": bp,
+        "namakshara": nama,
         "sun_times": {"sunrise": fmt_local(sr), "sunset": fmt_local(ss),
                       "next_sunrise": fmt_local(nsr), "previous_sunset": fmt_local(pss),
                       "hindu_weekday": T.VARAS[hindu_wd]},
@@ -188,6 +194,7 @@ def birth_chart(p):
             "yogas": "TRADITIONAL rules; existence only",
             "upagrahas": "DERIVED (BPHS / Phaladeepika profiles)",
             "dignity_combustion": "TRADITIONAL",
+            "namakshara": "TRADITIONAL table on the CALCULATED Moon pada",
         },
     }
 
@@ -204,7 +211,7 @@ def panchanga(p):
     from .localtime import LocalTime
     lt = LocalTime.from_params(p)
     noon = lt.midnight(y, m, d) + 0.5
-    mp = moudhya.periods(noon - 1.0, noon + 1.0, p.get("ayanamsa", "lahiri"),
+    mp = moudhya.periods(noon - 1.0, noon + 400.0, p.get("ayanamsa", "lahiri"),
                          float(p.get("moudhya_padding_days", 0) or 0), lt.iso)
     out["moudhya"] = moudhya.status(mp, noon)
     out["engine"] = "astro_engine " + ENGINE_VERSION
