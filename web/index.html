@@ -342,11 +342,14 @@
       <div class="seg-row"><div class="seg panch-seg"><button type="button" class="on">Daily</button><button type="button" data-go="calendar">Monthly</button><button type="button" data-go="festivals">Yearly</button></div></div>
       <form id="panch-form" class="card form toolbar">
         <div class="tb-date">
-          <button type="button" class="icon-btn day-step" data-step="-1" aria-label="Previous day"><svg class="ico"><use href="#i-left"/></svg></button>
-          <label class="bare"><span class="sr" data-i18n="Date">Date</span><input name="date" type="date" required></label>
-          <button type="button" class="icon-btn day-step" data-step="1" aria-label="Next day"><svg class="ico"><use href="#i-right"/></svg></button>
-          <button type="button" class="btn ghost sm today-btn" data-i18n="Today">Today</button>
-          <button type="button" class="btn ghost sm" id="panch-tomorrow">Tomorrow</button>
+          <span class="lb" data-i18n="Date">Date</span>
+          <div class="tb-row">
+            <button type="button" class="icon-btn day-step" data-step="-1" aria-label="Previous day"><svg class="ico"><use href="#i-left"/></svg></button>
+            <label class="bare"><span class="sr" data-i18n="Date">Date</span><input name="date" type="date" required></label>
+            <button type="button" class="icon-btn day-step" data-step="1" aria-label="Next day"><svg class="ico"><use href="#i-right"/></svg></button>
+            <button type="button" class="btn ghost sm today-btn" data-i18n="Today">Today</button>
+            <button type="button" class="btn ghost sm" id="panch-tomorrow">Tomorrow</button>
+          </div>
         </div>
         <div class="place-slot" data-variant="compact"></div>
         <div class="actions"><button type="submit" class="btn primary" data-i18n="Calculate">Calculate</button><span class="hint" id="panch-hint"></span></div>
@@ -362,12 +365,15 @@
       <div class="seg-row"><div class="seg panch-seg"><button type="button" data-go="panchanga">Daily</button><button type="button" class="on">Monthly</button><button type="button" data-go="festivals">Yearly</button></div></div>
       <form id="cal-form" class="card form toolbar">
         <div class="tb-date">
-          <button type="button" class="icon-btn month-step" data-step="-1" aria-label="Previous month"><svg class="ico"><use href="#i-left"/></svg></button>
-          <label class="bare"><span class="sr" data-i18n="Month">Month</span><input name="month" type="month" required></label>
-          <button type="button" class="icon-btn month-step" data-step="1" aria-label="Next month"><svg class="ico"><use href="#i-right"/></svg></button>
-          <button type="button" class="btn ghost sm" id="cal-this">This month</button>
+          <span class="lb" data-i18n="Month">Month</span>
+          <div class="tb-row">
+            <button type="button" class="icon-btn month-step" data-step="-1" aria-label="Previous month"><svg class="ico"><use href="#i-left"/></svg></button>
+            <label class="bare"><span class="sr" data-i18n="Month">Month</span><input name="month" type="month" required></label>
+            <button type="button" class="icon-btn month-step" data-step="1" aria-label="Next month"><svg class="ico"><use href="#i-right"/></svg></button>
+            <button type="button" class="btn ghost sm" id="cal-this">This month</button>
+          </div>
         </div>
-        <label class="bare">Show
+        <label class="bare"><span class="lb">Show</span>
           <select name="show">
             <option value="tithi">Tithi, nakshatra, festivals</option>
             <option value="sun">Sunrise / sunset</option>

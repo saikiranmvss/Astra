@@ -933,7 +933,7 @@ Lagna            tropical ${dms(L.tropical_longitude)} \u2212 A = ${signDeg(L.lo
   const repro = `
   <div class="card">
     <div class="card-head"><h3>Reproducibility &amp; status</h3></div>
-    <table class="tbl">${Object.entries(Object.assign({}, r.reproducibility, r.profile)).map(([k, v]) => `<tr><td class="hint">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}
+    <table class="tbl kv">${Object.entries(Object.assign({}, r.reproducibility, r.profile)).map(([k, v]) => `<tr><td class="hint">${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}
     ${Object.entries(r.status || {}).map(([k, v]) => `<tr><td class="hint">status: ${esc(k)}</td><td>${esc(v)}</td></tr>`).join("")}
     <tr><td class="hint">engine</td><td>${esc(r.engine)} \u00b7 computed in ${r.compute_seconds} s</td></tr></table>
   </div>`;

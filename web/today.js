@@ -263,17 +263,17 @@ function timingsTable(r, now) {
       <td class="num"><b>${hm(w.start)} \u2013 ${tmRel(w.end, r.panchanga.date)}</b></td><td><span class="pill ${w.kind}">${w.kind === "bad" ? "avoid" : w.kind === "good" ? "good" : "info"}</span></td>
       <td><span class="st ${st}">${st}</span></td></tr>`;
   }).join("");
-  return `<table class="tt"><tr><th>Window</th><th>Time</th><th>Type</th><th>Status</th></tr>${rows}</table>`;
+  return `<div class="tscroll"><table class="tt"><tr><th>Window</th><th>Time</th><th>Type</th><th>Status</th></tr>${rows}</table></div>`;
 }
 function planetsTable(r) {
   const s = settings();
-  return `<table class="tt"><tr><th>${t("Planet") || "Planet"}</th><th>${t("Rashi")}</th><th>Degree</th><th>${t("Nakshatra")}</th><th>Motion</th></tr>
+  return `<div class="tscroll"><table class="tt"><tr><th>${t("Planet") || "Planet"}</th><th>${t("Rashi")}</th><th>Degree</th><th>${t("Nakshatra")}</th><th>Motion</th></tr>
     ${r.sky.planets.filter((p) => ORDER.includes(p.planet) || (s.show_outer && OUTER.includes(p.planet))).map((p) => {
       const retro = p.retrograde && !["Rahu", "Ketu"].includes(p.planet);
       return `<tr><td>${pdot(p.planet)}<b>${esc(tr("graha", p.planet))}</b></td><td>${esc(tr("rashi", p.rashi.name))}</td><td class="num">${esc(dms(p.longitude % 30, false))}</td>
         <td>${esc(tr("nakshatra", p.nakshatra.name))} <span class="hint">p${p.nakshatra.pada}</span></td>
         <td>${retro ? '<span class="tagpill de">R</span>' : '<span class="hint">direct</span>'}${p.combust ? ' <span class="tagpill warn" title="within combustion orb of the Sun">combust</span>' : ""}</td></tr>`;
-    }).join("")}</table>`;
+    }).join("")}</table></div>`;
 }
 function muhurtaToday(r) {
   const mu = r.muhurta;
@@ -308,7 +308,7 @@ function moudhyaCard(r) {
   const list = md.periods.filter((p) => !p.end || p.end >= now.slice(0, 10)).map((p) => `<tr><td>${pdot(p.planet)}<b>${esc(p.name)}</b></td><td>${esc(dShort(p.start))} ${p.start ? hm(p.start) : ""}</td><td>${esc(dShort(p.end))} ${p.end ? hm(p.end) : ""}</td><td class="num">${p.days ? Math.round(p.days) : "\u2014"}</td><td class="hint">${esc(p.type)} \u00b7 orb ${p.orb_deg}\u00b0</td></tr>`).join("");
   return `${moudhyaRows(md.status)}
     <div class="md-chart">${lanes}<div class="md-months">${months.join("")}</div></div>
-    <table class="tt"><tr><th>Period</th><th>From</th><th>To</th><th>Days</th><th>Type</th></tr>${list || '<tr><td colspan="5" class="hint">No moudhyami in the coming year.</td></tr>'}</table>
+    <div class="tscroll"><table class="tt"><tr><th>Period</th><th>From</th><th>To</th><th>Days</th><th>Type</th></tr>${list || '<tr><td colspan="5" class="hint">No moudhyami in the coming year.</td></tr>'}</table></div>
     <p class="hint">${esc(md.rule)}. Start and end are root-solved for each planet; marriage, upanayana, griha pravesha and similar ceremonies are not suggested inside these periods.</p>`;
 }
 function personalCard(r) {
