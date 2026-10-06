@@ -97,22 +97,24 @@ class DayRange(object):
             return solve(lambda t: self._f(body, t), a, b, fa, fb, tol_days=0.5 / 86400.0)
         return None
 
-    def _event(self, body, kind, midnight, prev):
+    def _event(self, body, kind, start, prev):
         if prev is not None:
             t = self._near(body, kind, prev + 1.0, 0.03)
-            if t is not None and midnight <= t < midnight + 1.0:
+            if t is not None and start <= t < start + 1.0:
                 return t
-        return self.eng.first_event(body, kind, midnight, self.site, self.profile)
+        return self.eng.first_event(body, kind, start, self.site, self.profile)
 
     def _rise_set(self):
         n = len(self.dates)
         self.midnights = [self.lt.midnight(*d) for d in self.dates]
         nxt = calendar(julian_day(*self.dates[-1]) + 1.0)[:3]
         self.midnights.append(self.lt.midnight(*nxt))
+        # sun events from local mean (solar) midnight, as in suntimes.day_sun_times
+        anchors = [julian_day(*d) - self.site[1] / 360.0 for d in self.dates + [nxt]]
         self.rises, self.sets = [], []
         pr = ps = None
         for i in range(n + 1):
-            m = self.midnights[i]
+            m = anchors[i]
             r = self._event("sun", "rise", m, pr)
             s_ = self._event("sun", "set", r if r is not None else m, ps)
             self.rises.append(r)

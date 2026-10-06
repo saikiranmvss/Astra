@@ -13,6 +13,7 @@ profile so the two are never silently merged.
 """
 from . import tables as T
 from .chart import ascendant_tropical, nakshatra_info, norm360, rashi_info
+from .suntimes import day_part
 from .timescale import Instant
 
 KALAVELA = {"Sun": "Kala", "Mars": "Mrityu", "Mercury": "Ardhaprahara",
@@ -36,16 +37,11 @@ def _lagna_at(ctx, t, lat, lon):
     return norm360(ascendant_tropical(o, lat, lon)[0] - o.ayan_true)
 
 
-def kalavelas(ctx, birth_jd, sunrise, sunset, next_sunrise, prev_sunset, weekday, lat, lon,
-              fmt):
+def kalavelas(ctx, birth_jd, sun_times, sun_hour_angle, weekday, lat, lon, fmt):
     """weekday = lord index (0=Sun) of the Hindu day containing the birth."""
-    if sunrise is not None and sunset is not None and sunrise <= birth_jd < sunset:
-        start, length, first_lord, part = sunrise, sunset - sunrise, weekday, "day"
-    elif sunset is not None and next_sunrise is not None and birth_jd >= sunset:
-        start, length, first_lord, part = sunset, next_sunrise - sunset, (weekday + 4) % 7, "night"
-    else:
-        start, length, first_lord, part = prev_sunset, sunrise - prev_sunset, (weekday + 4) % 7, "night"
-    seg = length / 8.0
+    part, start, end = day_part(birth_jd, sun_times, sun_hour_angle)
+    first_lord = weekday if part == "day" else (weekday + 4) % 7
+    seg = (end - start) / 8.0
     out = {}
     lords = [T.VARA_LORD[(first_lord + i) % 7] for i in range(7)]
     for i, lord in enumerate(lords):
@@ -60,15 +56,13 @@ def kalavelas(ctx, birth_jd, sunrise, sunset, next_sunrise, prev_sunset, weekday
     return part, out
 
 
-def compute(ctx, chart, birth_jd, sun_times, weekday, lat, lon, fmt):
+def compute(ctx, chart, birth_jd, sun_times, sun_hour_angle, weekday, lat, lon, fmt):
     sun = chart["grahas"]["Sun"]["longitude"]
     asc_sign = int(chart["lagna"]["longitude"] // 30.0)
     pts = {}
     for k, v in sun_chain(sun).items():
         pts[k] = {"longitude": v, "rule": "Sun-based (BPHS)"}
-    sunrise, sunset, next_sunrise, prev_sunset = sun_times
-    part, kv = kalavelas(ctx, birth_jd, sunrise, sunset, next_sunrise, prev_sunset, weekday,
-                         lat, lon, fmt)
+    part, kv = kalavelas(ctx, birth_jd, sun_times, sun_hour_angle, weekday, lat, lon, fmt)
     pts.update(kv)
     for k, v in pts.items():
         lon_ = v["longitude"]

@@ -9,6 +9,7 @@ import math
 
 from . import tables as T
 from .constants import DEG2RAD, RAD2DEG
+from .suntimes import day_part
 from .vargas import varga
 
 PROFILE = {
@@ -149,14 +150,9 @@ def compute(ch):
     from_midnight = 180.0 - abs(H)
     birth, sr, ss, nsr, pss = (ch["birth"], ch["sunrise"], ch["sunset"], ch["next_sunrise"],
                                ch["prev_sunset"])
-    is_day = sr is not None and ss is not None and sr <= birth < ss
-    if is_day:
-        third = int(min(2, (birth - sr) / ((ss - sr) / 3.0)))
-        tri_lord = ("Mercury", "Sun", "Saturn")[third]
-    else:
-        start, end = (ss, nsr) if (ss is not None and birth >= ss) else (pss, sr)
-        third = int(min(2, (birth - start) / ((end - start) / 3.0)))
-        tri_lord = ("Moon", "Venus", "Mars")[third]
+    part, start, end = day_part(birth, (sr, ss, nsr, pss), H)
+    third = int(min(2, (birth - start) / ((end - start) / 3.0)))
+    tri_lord = (("Mercury", "Sun", "Saturn") if part == "day" else ("Moon", "Venus", "Mars"))[third]
     A = ch["civil_jdn"] - KALI_EPOCH_JDN
     abda_lord = T.VARA_LORD[(5 + (A // 360) * 360) % 7]
     masa_lord = T.VARA_LORD[(5 + (A // 30) * 30) % 7]
@@ -188,7 +184,7 @@ def compute(ch):
         res[p]["kala"] = {"nathonnatha": nat, "paksha": paksha, "tribhaga": tri,
                           "abda_masa_vara_hora": lords, "ayana": ay, "yuddha": 0.0}
         res[p]["declination"] = dec
-    kala_info = {"day_birth": is_day, "tribhaga_lord": tri_lord, "abda_lord": abda_lord,
+    kala_info = {"day_birth": part == "day", "tribhaga_lord": tri_lord, "abda_lord": abda_lord,
                  "masa_lord": masa_lord, "vara_lord": vara_lord, "hora_lord": hora_lord,
                  "ahargana": A, "sun_hour_angle": H}
 

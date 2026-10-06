@@ -10,6 +10,7 @@ from .constants import (DEG2RAD, MOON_RADIUS_KM, NAKSHATRA_SPAN, PADA_SPAN, RAD2
                         SUN_RADIUS_KM, AU_KM)
 from .positions import apparent_gcrs, equatorial_of_date
 from .rootfind import angle_crossing, secant_crossing, solve
+from .suntimes import day_sun_times
 from .timescale import Instant, calendar, format_jd, julian_day
 
 REFRACTION_DEG = 34.0 / 60.0
@@ -241,9 +242,7 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
     eng = engine or Engine(ayanamsa_model)
     site = (lat, lon, elev)
     local_midnight = julian_day(year, month, day) - tz_minutes / 1440.0
-    sunrise = eng.first_event("sun", "rise", local_midnight, site, sunrise_profile)
-    sunset = eng.first_event("sun", "set", sunrise or local_midnight, site, sunrise_profile)
-    next_sunrise = eng.first_event("sun", "rise", local_midnight + 1.0, site, sunrise_profile)
+    sunrise, sunset, next_sunrise, _ = day_sun_times(eng, year, month, day, site, sunrise_profile)
     moon_events = eng.horizon_events("moon", local_midnight, local_midnight + 1.0, site,
                                      sunrise_profile)
     moonrise = next((t for k, t in moon_events if k == "rise"), None)

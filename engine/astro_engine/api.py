@@ -9,6 +9,7 @@ from .chart import ChartContext, compute_chart, sign_of
 from .constants import NAKSHATRA_SPAN
 from .panchanga import Engine, compute_panchanga, karana_name, tithi_name
 from .sidereal import LABELS
+from .suntimes import day_sun_times
 from .timescale import Instant, calendar, format_jd, julian_day
 
 REPRODUCIBILITY = {
@@ -36,15 +37,13 @@ def _parse_time(s):
     return parts
 
 
-def _birth_panchanga(eng, jd, site, tz, profile):
+def _birth_panchanga(eng, jd, tz, sunrise):
     e = eng.elongation(jd)
     ti = int(e // 12.0)
     ki = int(e // 6.0)
     ms = eng.moon_sid(jd)
     ys = eng.yoga_angle(jd)
     y, mo, d = calendar(jd + tz / 1440.0)[:3]
-    midnight = julian_day(y, mo, d) - tz / 1440.0
-    sunrise = eng.first_event("sun", "rise", midnight, site, profile)
     civil_wd = int(math.floor(julian_day(y, mo, d) + 0.5) + 1) % 7
     wd = civil_wd if (sunrise is None or jd >= sunrise) else (civil_wd - 1) % 7
     tithi_iv = eng.interval(eng.elongation, 12.0, jd, 0.25)
@@ -112,7 +111,11 @@ def birth_chart(p):
 
     eng = Engine(model, ctx=ctx)
     site = (lat, lon, elev)
-    bp = _birth_panchanga(eng, jd_utc, site, tz, profile)
+    # sun times around the birth (Hindu day runs sunrise to sunrise)
+    ly, lmo, ld = calendar(jd_utc + tz / 1440.0)[:3]
+    sun_times = day_sun_times(eng, ly, lmo, ld, site, profile)
+    sr, ss, nsr, pss = sun_times
+    bp = _birth_panchanga(eng, jd_utc, tz, sr)
     lm = eng.lunar_month(jd_utc)
     bp["lunar_month"] = {"name": lm["name"], "adhika": lm["adhika"], "system": "Amanta"}
     from . import namakshara
@@ -121,13 +124,6 @@ def birth_chart(p):
     nama = namakshara.for_birth(sid["Moon"], jd_utc, pada_a, pada_b,
                                 lambda j: format_jd(j + tz / 1440.0))
 
-    # sun times around the birth (Hindu day runs sunrise to sunrise)
-    ly, lmo, ld = calendar(jd_utc + tz / 1440.0)[:3]
-    midnight = julian_day(ly, lmo, ld) - tz / 1440.0
-    sr = eng.first_event("sun", "rise", midnight, site, profile)
-    ss = eng.first_event("sun", "set", sr or midnight, site, profile)
-    nsr = eng.first_event("sun", "rise", midnight + 1.0, site, profile)
-    pss = eng.first_event("sun", "set", midnight - 1.0, site, profile)
     civil_wd = int(math.floor(julian_day(ly, lmo, ld) + 0.5) + 1) % 7
     before_sunrise = sr is not None and jd_utc < sr
     hindu_wd = (civil_wd - 1) % 7 if before_sunrise else civil_wd
@@ -154,7 +150,7 @@ def birth_chart(p):
     yg = yogas.detect(sid, chart["lagna"]["longitude"],
                       {k: g[k]["speed_deg_per_day"] for k in g})
     cd = chara_dasha.compute(sign_of(chart["lagna"]["longitude"]), sid, jd_utc, tz, now_jd)
-    up = upagraha.compute(ctx, chart, jd_utc, (sr, ss, nsr, pss), hindu_wd, lat, lon, fmt_local)
+    up = upagraha.compute(ctx, chart, jd_utc, sun_times, sun_ha, hindu_wd, lat, lon, fmt_local)
 
     return {
         "engine": "astro_engine " + ENGINE_VERSION,

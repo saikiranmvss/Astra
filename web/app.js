@@ -390,11 +390,21 @@ async function geoSearch(q) {
 }
 async function geoReverse(lat, lon) {
   const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&zoom=10&accept-language=en&lat=${lat}&lon=${lon}`);
-  if (!res.ok) return "";
+  if (!res.ok) return { name: "", tz: null };
   const x = await res.json();
   const a = x.address || {};
-  return [a.city || a.town || a.village || a.county || "", a.state || "", a.country || ""].filter(Boolean).join(", ");
+  return { name: [a.city || a.town || a.village || a.county || "", a.state || "", a.country || ""].filter(Boolean).join(", "),
+    tz: guessTz(a, +lon) };
 }
+const zoneCache = {};
+/* resolves to the IANA zone at the coordinates, or null when offline or not inferable */
+function zoneAt(lat, lon) {
+  const k = (+lat).toFixed(2) + "," + (+lon).toFixed(2);
+  if (!(k in zoneCache)) zoneCache[k] = geoReverse(lat, lon).then((g) => (g.tz && ZONES.includes(g.tz) ? g.tz : null), () => null);
+  return zoneCache[k];
+}
+/* hours between a UTC offset and local mean solar time at a longitude, wrapped to 0..12 */
+const solarGap = (offMin, lon) => Math.abs(((((offMin / 60 - lon / 15) % 24) + 36) % 24) - 12);
 function localPlaceMatches(q) {
   const s = q.toLowerCase();
   const out = [];
@@ -420,6 +430,7 @@ function renderPlaceSlot(el, prefix) {
         ${compact ? `<button type="button" class="adorn place-toggle" title="Coordinates and time zone">${ico("sliders")}</button>` : ""}
         <div class="ac-list" hidden></div></div></label>
     ${compact ? `<div class="place-meta"></div>` : ""}
+    <div class="place-warn" role="alert" hidden></div>
     <div class="place-more"${compact ? " hidden" : ""}>
       <label><span class="lb"><span data-i18n="Coordinates">Coordinates</span></span><input name="${prefix}coords" required value="${esc(coords)}" placeholder="17.385, 78.4867" title="latitude, longitude (paste from Google Maps)"></label>
       <label><span class="lb"><span data-i18n="Time zone">Time Zone</span></span><select name="${prefix}tz">${ZONES.map((z) => `<option${z === tz ? " selected" : ""}>${esc(z)}</option>`).join("")}</select></label>
@@ -428,7 +439,43 @@ function renderPlaceSlot(el, prefix) {
     </div>`;
   const q = (n) => el.querySelector(`[name="${prefix}${n}"]`);
   const inp = el.querySelector(".place-q"), list = el.querySelector(".ac-list"), meta = el.querySelector(".place-meta");
-  const updateMeta = () => { if (meta) meta.textContent = q("coords").value + " \u00b7 " + q("tz").value + (q("tzoverride").value ? " \u00b7 UTC" + q("tzoverride").value : ""); };
+  const warn = el.querySelector(".place-warn");
+  let zoneSeq = 0, coordsEdited = false;
+  const setZone = (z) => { q("tz").value = z; q("tzoverride").value = ""; updateMeta(); };
+  /* flag a zone whose clock is hours away from the Sun at the coordinates (e.g. an Indian place left on UTC) */
+  function checkZone() {
+    const seq = ++zoneSeq;
+    let lat, lon, off;
+    try {
+      ({ lat, lon } = parseCoords(q("coords").value));
+      off = parseOverride(q("tzoverride").value) ?? offsetAt(q("tz").value, Date.now());
+    } catch (e) { warn.hidden = true; return; }
+    const gap = Math.round(solarGap(off, lon) * 60);
+    if (gap <= 180) { warn.hidden = true; return; }
+    const zone = q("tzoverride").value || q("tz").value === "UTC" ? "UTC" + fmtOffset(off) : `${q("tz").value} (UTC${fmtOffset(off)})`;
+    warn.innerHTML = `${ico("info")}<div><b>Time zone may not match this place.</b> ${esc(zone)} is ${Math.floor(gap / 60)} h ${gap % 60} min away from local time at these coordinates (about UTC${fmtOffset(Math.round(lon * 4))}). Times are read as clock time in the selected zone.<div class="pw-fix"></div></div>`;
+    warn.hidden = false;
+    zoneAt(lat, lon).then((z) => {
+      if (seq !== zoneSeq || !z || (z === q("tz").value && !q("tzoverride").value)) return;
+      const fix = warn.querySelector(".pw-fix");
+      fix.innerHTML = `<button type="button" class="btn ghost sm">Use ${esc(z)}</button>`;
+      fix.firstChild.addEventListener("click", () => setZone(z));
+    });
+  }
+  /* coordinates typed or pasted by hand: follow them with the zone of that place */
+  async function zoneFromCoords() {
+    const typed = q("coords").value;
+    let c;
+    try { c = parseCoords(typed); } catch (e) { return; }
+    const z = await zoneAt(c.lat, c.lon);
+    if (!z || z === q("tz").value || q("coords").value !== typed) return;
+    setZone(z);
+    toast("Time zone set to " + z + " for these coordinates");
+  }
+  function updateMeta() {
+    if (meta) meta.textContent = q("coords").value + " \u00b7 " + q("tz").value + (q("tzoverride").value ? " \u00b7 UTC" + q("tzoverride").value : "");
+    checkZone();
+  }
   updateMeta();
   let timer = null, items = [], active = -1;
   function show(arr, loading) {
@@ -452,7 +499,7 @@ function renderPlaceSlot(el, prefix) {
     const loc = localPlaceMatches(v);
     const remote = v.length >= 3 && !/^-?\d/.test(v);
     show(loc, remote);
-    if (/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(v)) { q("coords").value = v; updateMeta(); }
+    if (/^-?\d+(\.\d+)?\s*,\s*-?\d+(\.\d+)?$/.test(v)) { q("coords").value = v; updateMeta(); timer = setTimeout(zoneFromCoords, 600); }
     if (remote) timer = setTimeout(async () => {
       try { const g = await geoSearch(v); if (inp.value.trim() === v) show(loc.concat(g)); } catch (e) { if (inp.value.trim() === v) show(loc); }
     }, 420);
@@ -474,6 +521,8 @@ function renderPlaceSlot(el, prefix) {
   list.addEventListener("mousedown", (ev) => ev.preventDefault());
   list.addEventListener("click", (ev) => { const b = ev.target.closest(".ac-i"); if (b) pick(items[+b.dataset.i]); });
   ["coords", "tz", "tzoverride"].forEach((n) => q(n).addEventListener("change", updateMeta));
+  q("coords").addEventListener("input", () => { coordsEdited = true; });
+  q("coords").addEventListener("change", () => { if (coordsEdited) { coordsEdited = false; zoneFromCoords(); } });
   const tog = el.querySelector(".place-toggle");
   if (tog) tog.addEventListener("click", () => { const more = el.querySelector(".place-more"); more.hidden = !more.hidden; tog.classList.toggle("on", !more.hidden); });
   el.querySelector(".locate").addEventListener("click", () => {
@@ -484,7 +533,7 @@ function renderPlaceSlot(el, prefix) {
       if (ZONES.includes(LOCAL_TZ)) q("tz").value = LOCAL_TZ;
       inp.value = "My location";
       updateMeta();
-      try { const n = await geoReverse(lat, lon); if (n) inp.value = n; } catch (e) { /* name is optional */ }
+      try { const g = await geoReverse(lat, lon); if (g.name) inp.value = g.name; } catch (e) { /* name is optional */ }
     }, (err) => toast("Location unavailable: " + err.message, "warn"));
   });
   el.querySelector(".save-place").addEventListener("click", () => {

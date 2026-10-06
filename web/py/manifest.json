@@ -26,6 +26,7 @@
     "astro_engine/series.py",
     "astro_engine/shadbala.py",
     "astro_engine/sidereal.py",
+    "astro_engine/suntimes.py",
     "astro_engine/tables.py",
     "astro_engine/timescale.py",
     "astro_engine/transits.py",
@@ -34,5 +35,5 @@
     "astro_engine/vec.py",
     "astro_engine/yogas.py"
   ],
-  "version": "18d14d0a62e8"
+  "version": "40d45b540d05"
 }
