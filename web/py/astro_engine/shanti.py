@@ -24,13 +24,31 @@ FIRE_START = {0, 9, 18}      # Ashwini, Magha, Mula begin a fire sign
 WATER_END = {8, 17, 26}      # Ashlesha, Jyeshtha, Revati end a water sign
 JYESHTHA, MULA = 17, 18
 TITHI_JUNCTION_END = {5, 10, 15, 20, 25, 30}
+# traditional effect of each Gandamoola pada: (harmful?, effect)
+GANDAMOOLA_PADA = {
+    0: [(True, "trouble to the father"), (False, "comfort and luxury"),
+        (False, "high position"), (False, "honour and fame")],
+    8: [(False, "auspicious"), (True, "loss of wealth"),
+        (True, "trouble to the mother"), (True, "trouble to the father")],
+    9: [(True, "trouble to the mother"), (True, "trouble to the father"),
+        (False, "happiness"), (False, "gain of wealth and learning")],
+    17: [(True, "trouble to the elder brother"), (True, "trouble to the younger brother"),
+         (True, "trouble to the mother"), (True, "trouble to the native")],
+    18: [(True, "trouble to the father"), (True, "trouble to the mother"),
+         (True, "loss of wealth"), (False, "auspicious")],
+    26: [(False, "royal honour"), (False, "high position"),
+         (False, "wealth and comfort"), (True, "many troubles")],
+}
+PADA_NEAR_MIN = 20.0
 STRONG_YOGAS = {"Vyatipata", "Vaidhriti"}
 MINOR_YOGAS = {"Vishkambha", "Atiganda", "Shula", "Ganda", "Vyaghata", "Vajra", "Parigha"}
 
 RULES = {
-    "gandamoola": "Gandamoola nakshatras: Ashwini, Ashlesha, Magha, Jyeshtha, Mula, Revati. "
-                  "Pada 1 of Ashwini/Magha/Mula and pada 4 of Ashlesha/Jyeshtha/Revati sit on the "
-                  "water-fire junction and are the strongest.",
+    "gandamoola": "Gandamoola nakshatras: Ashwini, Ashlesha, Magha, Jyeshtha, Mula, Revati. Each pada "
+                  "has its own effect; pada 1 of Ashwini/Magha/Mula and pada 4 of Ashlesha/Jyeshtha/"
+                  "Revati sit on the water-fire junction and are the strongest. Favourable padas are "
+                  "held free of dosha in most traditions, though some families still do a simple "
+                  "shanti. Some traditions read Jyeshtha / Mula effects for a girl on the in-laws.",
     "gandanta": "Nakshatra gandanta: last 2 ghatis (48 min) of Revati, Ashlesha, Jyeshtha and first "
                 "2 ghatis of Ashwini, Magha, Mula. Jyeshtha-Mula is Abhukta Mula.",
     "tithi_gandanta": "Tithi gandanta: 2 ghatis either side of the end of Panchami, Dashami, "
@@ -75,7 +93,21 @@ def _hm(minutes):
 
 def _pada(lon):
     nk = int(lon // NAKSHATRA_SPAN)
-    return nk, int((lon - nk * NAKSHATRA_SPAN) // (NAKSHATRA_SPAN / 4.0)) + 1
+    return nk, min(4, int((lon - nk * NAKSHATRA_SPAN) // (NAKSHATRA_SPAN / 4.0)) + 1)
+
+
+def gm_pada(nk, pada):
+    """(level, effect, junction) of a Gandamoola pada; None outside Gandamoola."""
+    if nk not in GANDAMOOLA:
+        return None
+    harmful, effect = GANDAMOOLA_PADA[nk][pada - 1]
+    junction = (nk in FIRE_START and pada == 1) or (nk in WATER_END and pada == 4)
+    return ("danger" if junction else "warn" if harmful else "info"), effect, junction
+
+
+def _pada_table(nk, pada):
+    return [{"pada": p, "level": gm_pada(nk, p)[0], "effect": gm_pada(nk, p)[1], "birth": p == pada}
+            for p in (1, 2, 3, 4)]
 
 
 def check_birth(eng, jd, tz, lat, lon, lagna_lon, fmt):
@@ -89,10 +121,24 @@ def check_birth(eng, jd, tz, lat, lon, lagna_lon, fmt):
     _, ns, ne = eng.interval(eng.moon_sid, NAKSHATRA_SPAN, jd, 0.25)
     name = T.NAKSHATRAS[nk]
     if nk in GANDAMOOLA:
-        strong = (nk in FIRE_START and pada == 1) or (nk in WATER_END and pada == 4)
-        items.append(_item("gandamoola", "Gandamoola nakshatra", "danger" if strong else "warn",
-                           "%s pada %d%s" % (name, pada, ", the junction pada (strongest)" if strong
-                                             else "")))
+        level, effect, junction = gm_pada(nk, pada)
+        tail = (", the junction pada (strongest)" if junction else
+                "; favourable pada, held free of dosha in most traditions" if level == "info" else "")
+        it = _item("gandamoola", "Gandamoola nakshatra", level,
+                   "%s pada %d: %s%s" % (name, pada, effect, tail))
+        it["padas"] = _pada_table(nk, pada)
+        items.append(it)
+        _, pa, pb = eng.interval(eng.moon_sid, NAKSHATRA_SPAN / 4.0, jd, 0.1)
+        for side, edge, other in (("began", pa, pada - 1), ("ends", pb, pada + 1)):
+            if edge is None or not 1 <= other <= 4:
+                continue
+            mins = abs(jd - edge) * 1440.0
+            if mins <= PADA_NEAR_MIN and gm_pada(nk, other)[0] != level:
+                items.append(_item("pada_edge", "Close to a pada boundary", "warn",
+                                   "Pada %d %s %s %s birth; pada %d (%s) would change the verdict. "
+                                   "Confirm the exact birth time."
+                                   % (pada, side, _hm(mins), "before" if side == "began" else "after",
+                                      other, gm_pada(nk, other)[1])))
     junction = None
     if nk in FIRE_START and ns is not None and (jd - ns) * 1440.0 <= JUNCTION_MIN:
         junction = ((nk - 1) % 27, nk, (jd - ns) * 1440.0, "after %s began" % name)
@@ -221,12 +267,13 @@ def _eclipse_items(jd, tz, lat, lon, fmt):
     return out
 
 
-def day_windows(naks, tithis, yogas, karanas, varjyam, fmt, day_start, day_end):
+def day_windows(naks, tithis, yogas, karanas, varjyam, fmt, day_start, day_end, padas=()):
     """Stretches of a Hindu day (sunrise to next sunrise) in which a birth would
     need (or often get) a shanti.
 
     naks/tithis/yogas/karanas are panchanga interval lists (1-based index, name,
-    start_jd, end_jd); varjyam is a list of (start_jd, end_jd, nakshatra)."""
+    start_jd, end_jd); varjyam is a list of (start_jd, end_jd, nakshatra); padas are
+    exact Moon pada intervals (global pada 0-107, start_jd, end_jd)."""
     J = JUNCTION_MIN / 1440.0
     out = []
 
@@ -241,14 +288,20 @@ def day_windows(naks, tithis, yogas, karanas, varjyam, fmt, day_start, day_end):
         if k not in GANDAMOOLA or a is None or b is None:
             continue
         nm = T.NAKSHATRAS[k]
-        add(a, b, "Gandamoola: " + nm, "warn", "gandamoola", "whole nakshatra")
+        exact = {gp % 4 + 1: (pa, pb) for gp, pa, pb in padas if gp // 4 == k}
         q = (b - a) / 4.0
+        for p in (1, 2, 3, 4):
+            pa, pb = exact.get(p) or (None, None)
+            if pa is None or pb is None:
+                pa, pb = a + (p - 1) * q, a + p * q
+            level, effect, junction = gm_pada(k, p)
+            add(pa, pb, "%s pada %d" % (nm, p), level, "gandamoola",
+                "Gandamoola: " + effect + (" (junction pada, strongest)" if junction else
+                                           " (favourable, usually no shanti)" if level == "info" else ""))
         if k in FIRE_START:
-            add(a, a + q, "%s pada 1 (strongest)" % nm, "danger", "gandamoola")
             add(a, a + J, "Abhukta Mula" if k == MULA else "Gandanta: start of " + nm, "danger",
                 "gandanta", "first 2 ghatis")
         else:
-            add(b - q, b, "%s pada 4 (strongest)" % nm, "danger", "gandamoola")
             add(b - J, b, "Abhukta Mula" if k == JYESHTHA else "Gandanta: end of " + nm, "danger",
                 "gandanta", "last 2 ghatis")
     for x in tithis:

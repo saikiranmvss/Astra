@@ -69,6 +69,33 @@ TRAITS = [
 ]
 
 
+PURPOSE = [("Dharma", "duty, principles and righteousness"), ("Artha", "wealth, work and practical goals"),
+           ("Kama", "desires, relationships and enjoyment"), ("Moksha", "inner life, detachment and spirituality")]
+NAVAMSA_TRAITS = [
+    "Bold, active and pioneering; quick to start things.",
+    "Steady, patient and fond of comfort and beauty.",
+    "Talkative, curious and clever; enjoys learning and trade.",
+    "Emotional, caring and attached to home and family.",
+    "Proud, generous and confident; likes to lead.",
+    "Analytical, careful and service-minded; attentive to detail.",
+    "Diplomatic, fair and sociable; seeks balance and partnership.",
+    "Intense, secretive and determined; deep feelings.",
+    "Optimistic, principled and religious; loves freedom.",
+    "Practical, disciplined and ambitious; works hard for results.",
+    "Independent, humane and unconventional; thinks of the group.",
+    "Kind, imaginative and devotional; sensitive to others.",
+]
+
+
+def of_pada(nak, pada):
+    """Pada-level nature: navamsa sign, its lord, purpose (from the sign's element) and traits."""
+    gp = nak * 4 + pada - 1
+    nav = gp % 12
+    purpose = PURPOSE[nav % 4]
+    return {"pada": pada, "navamsa": T.RASHIS[nav], "navamsa_lord": T.RASHI_LORD[nav],
+            "purpose": purpose[0], "purpose_text": purpose[1], "traits": NAVAMSA_TRAITS[nav]}
+
+
 def of_nakshatra(nak, sign=None, deg=None):
     """Nature of nakshatra index `nak` (0-26); sign (0-11) and degree add varna / vashya."""
     gana = GANA_NAMES[GANA_OF_NAK[nak]]
@@ -93,8 +120,13 @@ def of_nakshatra(nak, sign=None, deg=None):
 
 def for_moon(moon_lon):
     lon = moon_lon % 360.0
-    out = of_nakshatra(int(lon // NAK_SPAN) % 27, int(lon // 30) % 12, lon % 30)
+    nak = int(lon // NAK_SPAN) % 27
+    pada = min(4, int((lon - nak * NAK_SPAN) // (NAK_SPAN / 4)) + 1)
+    out = of_nakshatra(nak, int(lon // 30) % 12, lon % 30)
+    out["pada"] = of_pada(nak, pada)
+    out["padas"] = [of_pada(nak, p) for p in (1, 2, 3, 4)]
     out["status"] = "TRADITIONAL descriptions on the CALCULATED Moon nakshatra"
-    out["note"] = ("General traits of the birth star from the classical texts. The full chart "
+    out["note"] = ("General traits of the birth star from the classical texts; the pada adds the colour "
+                   "of its navamsa sign. The full chart "
                    "(lagna, planets, dashas) modifies them; read as tendencies, not a verdict.")
     return out

@@ -1130,7 +1130,19 @@ tr.row-danger > td { background: color-mix(in srgb, #ef4444 6%, transparent); }
 .nat-c { padding: 10px 12px; border-radius: 10px; background: var(--bg-2); min-width: 0; }
 .nat-c b { display: block; font-size: 14px; margin-top: 3px; overflow-wrap: anywhere; }
 .nat-c span { display: block; font-size: 11.5px; color: var(--muted); }
-@media (max-width: 560px) { .nat-top { grid-template-columns: 1fr; } }
+.pada-strip { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 8px 0 4px; }
+.pd { padding: 7px 9px; border-radius: 9px; background: var(--bg); border: 1px solid var(--line-3); border-top: 3px solid var(--line-2); font-size: 12px; color: var(--text-2); line-height: 1.4; }
+.pd b { display: block; font-size: 11.5px; color: var(--text); margin-bottom: 2px; }
+.pd.danger { border-top-color: #dc2626; }
+.pd.warn { border-top-color: #ea580c; color: var(--text-2); }
+.pd.info { border-top-color: #22c55e; }
+.pd.on { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); }
+.pd.on b { color: var(--primary); }
+.nat-pada { margin-top: 14px; padding: 12px 14px; border-radius: 12px; background: var(--bg-2); }
+.nat-pada-head b { font-size: 14px; margin-right: 8px; }
+.nat-pada-head span { font-size: 12.5px; color: var(--muted); }
+.nat-pada p { margin: 6px 0 4px; font-size: 13.5px; }
+@media (max-width: 560px) { .nat-top { grid-template-columns: 1fr; } .pada-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .cal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: 1px; }
 .cal-dot.danger { background: #dc2626; }
 .cal-dot.warn { background: #ea580c; }

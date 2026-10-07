@@ -163,6 +163,9 @@ function shFlag(sh, keys) {
   const it = sh && sh.items.filter((i) => keys.includes(i.key)).sort((a, b) => SH_ORDER[a.level] - SH_ORDER[b.level])[0];
   return it ? " " + flag(it.level, it.name, it.detail) : "";
 }
+const LEVEL_WORD = { danger: "Shanti", warn: "Caution", info: "Mild" };
+/* the four padas of a Gandamoola nakshatra with their traditional effects */
+const padaStrip = (padas) => `<div class="pada-strip">${padas.map((p) => `<span class="pd ${p.level}${p.birth ? " on" : ""}"><b>Pada ${p.pada}${p.birth ? " \u00b7 birth" : ""}</b>${esc(p.effect)}</span>`).join("")}</div>`;
 function shantiCard(sh) {
   if (!sh) return "";
   const ret = sh.nakshatra_return;
@@ -176,8 +179,8 @@ function shantiCard(sh) {
     <div class="card-head"><h3>Shanti check</h3><span class="hint">Janana dosha \u00b7 traditional rules on the calculated birth moment</span></div>
     <div class="sh-verdict ${sh.level}">${icon}<div><b>${esc(sh.title)}</b><small>${sub}</small></div></div>
     ${sh.items.length ? `<div class="sh-list">${sh.items.map((i) => `<div class="sh-item ${i.level}">${flag(i.level, i.level === "danger" ? "Shanti" : i.level === "warn" ? "Caution" : "Note")}
-      <div><b>${esc(i.name)}</b> <span>${esc(i.detail)}</span>${i.level !== "info" && i.remedy ? `<small>Remedy: ${esc(i.remedy)}</small>` : ""}${i.rule ? `<small class="hint">${esc(i.rule)}</small>` : ""}</div></div>`).join("")}</div>` : ""}
-    <p class="hint">Checked: Gandamoola, nakshatra / tithi / lagna gandanta, Abhukta Mula, Amavasya, Krishna Chaturdashi, Vishti, Vyatipata / Vaidhriti, Varjyam, Sankranti, eclipse. Not checked: ${esc(sh.not_checked)} Traditions differ; confirm with your family priest.</p>
+      <div><b>${esc(i.name)}</b> <span>${esc(i.detail)}</span>${i.padas ? padaStrip(i.padas) : ""}${i.level !== "info" && i.remedy ? `<small>Remedy: ${esc(i.remedy)}</small>` : ""}${i.rule ? `<small class="hint">${esc(i.rule)}</small>` : ""}</div></div>`).join("")}</div>` : ""}
+    <p class="hint">Checked: Gandamoola pada by pada, nakshatra / tithi / lagna gandanta, Abhukta Mula, Amavasya, Krishna Chaturdashi, Vishti, Vyatipata / Vaidhriti, Varjyam, Sankranti, eclipse. Not checked: ${esc(sh.not_checked)} Traditions differ; confirm with your family priest.</p>
   </div>`;
 }
 const GANA_OF_NAK = "DMRMDMDDRRMMDRDRDRRMMDRRMMD";
@@ -198,6 +201,11 @@ function natureCard(n) {
       <div class="nat-gana ${n.gana.name.toLowerCase()}"><small>Gana (Gunam)</small><b>${esc(n.gana.name)} gana</b><em>${esc(n.gana.meaning)} temperament</em></div>
       <p class="nat-traits"><b>${esc(n.traits)}</b><span>${esc(n.gana.text)}</span><span>${esc(n.gati.name)} (${esc(n.gati.meaning)}) star: ${esc(n.gati.text)}</span></p>
     </div>
+    ${n.pada ? `<div class="nat-pada">
+      <div class="nat-pada-head"><b>Pada ${n.pada.pada} of ${esc(tr("nakshatra", n.nakshatra))}</b><span>${esc(tr("rashi", n.pada.navamsa))} navamsa \u00b7 lord ${esc(tr("graha", n.pada.navamsa_lord))} \u00b7 ${esc(n.pada.purpose)} pada (${esc(n.pada.purpose_text)})</span></div>
+      <p>${esc(n.pada.traits)}</p>
+      <div class="pada-strip">${n.padas.map((p) => `<span class="pd${p.pada === n.pada.pada ? " on" : ""}"><b>Pada ${p.pada} \u00b7 ${esc(tr("rashi", p.navamsa))}</b>${esc(p.purpose)}: ${esc(p.traits)}</span>`).join("")}</div>
+    </div>` : ""}
     <div class="nat-grid">
       ${cell("Yoni (animal)", esc(n.yoni.animal), n.yoni.gender)}
       ${cell("Deity", esc(n.deity), "")}
@@ -215,7 +223,7 @@ function shantiWindows(list, now, day) {
   if (!list || !list.length) return `<div class="empty-inline">${ico("check")}<div><b>No shanti windows</b><small>A birth at any time this day raises no janana dosha.</small></div></div>`;
   return `<div class="shw-list">${list.map((w) => {
     const on = now && w.start <= now && now < w.end;
-    return `<div class="shw-row ${w.level}${on ? " on" : ""}" title="${esc(w.remedy || "")}">${flag(w.level, w.level === "danger" ? "Shanti" : "Caution")}
+    return `<div class="shw-row ${w.level}${on ? " on" : ""}" title="${esc(w.level === "info" ? "" : w.remedy || "")}">${flag(w.level, LEVEL_WORD[w.level])}
       <span class="shw-n"><b>${esc(w.name)}</b>${w.note ? `<small>${esc(w.note)}</small>` : ""}</span>
       <span class="shw-t">${tmRel(w.start, day)} \u2013 ${tmRel(w.end, day)}${on ? "<em>now</em>" : ""}</span></div>`;
   }).join("")}</div>`;
@@ -1054,7 +1062,7 @@ function renderChart(r) {
       <div class="row-actions"><button type="button" class="ghost" id="dl-json">${ico("download")}JSON</button><button type="button" class="ghost" data-report="chart">${ico("print")}Report</button></div></div>
     <div class="summary">
       <div class="stat"><div class="k">${t("Lagna")}</div><div class="v">${esc(rashiName(L.rashi))} ${dms(L.rashi.degrees_in_sign, false)}</div><div class="s">${esc(nakName(L.nakshatra))} p${L.nakshatra.pada}${warnLagna ? ' \u00b7 <span class="warn">near sign edge</span>' : ""}${shFlag(sh, ["lagna_gandanta"])}</div></div>
-      <div class="stat"><div class="k">Janma ${t("Nakshatra")}</div><div class="v">${esc(nakName(moon.nakshatra))}</div><div class="s">pada ${moon.nakshatra.pada} \u00b7 lord ${esc(tr("graha", moon.nakshatra.lord))}${shFlag(sh, ["abhukta_mula", "nakshatra_gandanta", "gandamoola"])}</div></div>
+      <div class="stat"><div class="k">Janma ${t("Nakshatra")}</div><div class="v">${esc(nakName(moon.nakshatra))}</div><div class="s">pada ${moon.nakshatra.pada} \u00b7 lord ${esc(tr("graha", moon.nakshatra.lord))}${shFlag(sh, ["abhukta_mula", "nakshatra_gandanta", "gandamoola", "pada_edge"])}</div></div>
       <div class="stat"><div class="k">Janma ${t("Rashi")}</div><div class="v">${esc(rashiName(moon.rashi))}</div><div class="s">Moon ${dms(moon.rashi.degrees_in_sign, false)}</div></div>
       ${nat ? `<div class="stat"><div class="k">Gana (Gunam)</div><div class="v">${ganaPill(nat.gana)}</div><div class="s">${esc(nat.gati.name)} (${esc(nat.gati.meaning.toLowerCase())}) \u00b7 ${esc(nat.yoni.animal)} yoni</div></div>` : ""}
       ${sh ? `<div class="stat sh-stat ${sh.level}"><div class="k">Shanti</div><div class="v">${esc(sh.level === "ok" ? "Not needed" : sh.level === "danger" ? "Advised" : "Commonly advised")}</div><div class="s">${esc(sh.items.filter((i) => i.level !== "info").map((i) => i.name).join(", ") || "no janana dosha")}</div></div>` : ""}

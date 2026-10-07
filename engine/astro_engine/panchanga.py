@@ -357,7 +357,7 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
 
     from . import shanti
     shanti_windows = shanti.day_windows(nak_list, tithi_list, yoga_list, karana_list, varj_jd,
-                                        lambda j: _local(j, tz_minutes), ref, day_end)
+                                        lambda j: _local(j, tz_minutes), ref, day_end, padas)
 
     return {
         "date": "%04d-%02d-%02d" % (year, month, day),
