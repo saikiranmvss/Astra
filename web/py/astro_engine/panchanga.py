@@ -287,6 +287,7 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
     next_sk, next_sk_sign = eng.sankranti(ref, 1)
 
     muhurta = None
+    varj, varj_jd = [], []
     if sunrise is not None and sunset is not None and next_sunrise is not None:
         day_len = sunset - sunrise
         night_len = next_sunrise - sunset
@@ -334,7 +335,7 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
             return d
         muhurta["durmuhurta"] = [span(a, b) for a, b in MU.durmuhurtas(sunrise, sunset,
                                                                          next_sunrise, weekday)]
-        varj, amr = [], []
+        amr = []
         prev_naks = eng.interval(eng.moon_sid, NAKSHATRA_SPAN, ref - 1.0, 0.25)
         nak_spans = [(prev_naks[0], prev_naks[1], prev_naks[2])] + list(naks)
         seen = set()
@@ -346,11 +347,17 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
                 w = MU.nak_windows(table, k, a, b)
                 if w and w[1] > ref and w[0] < day_end:
                     dest.append(span(w[0], w[1], nakshatra=T.NAKSHATRAS[k]))
+                    if dest is varj:
+                        varj_jd.append((w[0], w[1], T.NAKSHATRAS[k]))
         muhurta["varjyam"] = varj
         muhurta["amrita_kala"] = amr
         muhurta["choghadiya"] = [dict(c, start=_local(c["start"], tz_minutes),
                                       end=_local(c["end"], tz_minutes))
                                  for c in MU.choghadiya(sunrise, sunset, next_sunrise, weekday)]
+
+    from . import shanti
+    shanti_windows = shanti.day_windows(nak_list, tithi_list, yoga_list, karana_list, varj_jd,
+                                        lambda j: _local(j, tz_minutes), ref, day_end)
 
     return {
         "date": "%04d-%02d-%02d" % (year, month, day),
@@ -368,6 +375,7 @@ def compute_panchanga(year, month, day, lat, lon, elev=0.0, tz_minutes=330,
         "yoga": yoga_list,
         "karana": karana_list,
         "namakshara": nama_list,
+        "shanti_windows": shanti_windows,
         "sun_sidereal_at_sunrise": sun_sid,
         "moon_sidereal_at_sunrise": moon_sid,
         "surya_rashi": T.RASHIS[int(sun_sid // 30.0)],

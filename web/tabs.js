@@ -57,6 +57,16 @@ function tithiMark(d) {
   const n = d.tithi.index;
   return (n === 11 || n === 26 ? '<span class="ekb" title="Ekadashi">EK</span>' : "") + moonSVG(n, 18);
 }
+/* caution dot of a calendar day: Amavasya / Krishna Chaturdashi / Gandamoola nakshatra at sunrise */
+function calCaution(d) {
+  const why = [];
+  if (d.tithi.index === 30) why.push(["danger", "Amavasya"]);
+  if (d.tithi.index === 29) why.push(["warn", "Krishna Chaturdashi"]);
+  if (GANDAMOOLA_NAK.has(d.nakshatra.name)) why.push(["warn", "Gandamoola nakshatra (" + d.nakshatra.name + ")"]);
+  if (!why.length) return "";
+  const lvl = why.some((w) => w[0] === "danger") ? "danger" : "warn";
+  return `<span class="cal-dot ${lvl}" title="${esc("Shanti caution at sunrise: " + why.map((w) => w[1]).join(", "))}"></span>`;
+}
 function renderCalendar(r) {
   const show = calForm.querySelector("[name=show]").value;
   const today = todayIso();
@@ -83,7 +93,7 @@ function renderCalendar(r) {
       body = `<div>\u263e\u2191 ${hm(d.moonrise)}</div><div>\u263e\u2193 ${hm(d.moonset)}</div>`;
     }
     cells += `<div class="cal-cell${d.date === today ? " today" : ""}${d.date === calSel ? " sel" : ""}${d.weekday === 0 ? " sun" : ""}" data-date="${d.date}">
-      <div class="cd"><b>${+d.date.slice(8)}</b><span class="paksha ${d.tithi.paksha === "Shukla" ? "sk" : "kr"}">${esc(tr("paksha", d.tithi.paksha)).slice(0, LANG === "en" ? 1 : 2)}</span>${mdTags}${tithiMark(d)}</div>${body}</div>`;
+      <div class="cd"><b>${+d.date.slice(8)}</b><span class="paksha ${d.tithi.paksha === "Shukla" ? "sk" : "kr"}">${esc(tr("paksha", d.tithi.paksha)).slice(0, LANG === "en" ? 1 : 2)}</span>${mdTags}${calCaution(d)}${tithiMark(d)}</div>${body}</div>`;
   }
   const months = [...new Set(r.days.map((d) => trMonth((d.month.adhika ? "Adhika " : "") + d.month.name)))].join(" / ");
   const head = [0, 1, 2, 3, 4, 5, 6].map((w) => `<div class="cal-h">${esc(varaShort(w))}</div>`).join("");
@@ -93,7 +103,7 @@ function renderCalendar(r) {
     <div class="card-head"><div class="cal-head"><span class="mt">${esc(mlabel)}</span><span class="ms">${esc(months)} \u00b7 Amanta</span></div>
       <div class="row-actions"><button type="button" class="ghost" id="cal-ics">${ico("panchanga")}Festivals .ics</button><button type="button" class="ghost" id="cal-csv">${ico("download")}CSV</button><button type="button" class="ghost" id="cal-json">JSON</button></div></div>
     <div class="cal">${head}${cells}</div>
-    <p class="hint">Tithi and nakshatra shown are those at sunrise, with their end time. Click a day for the full details.${monthHasMoudhya ? ` <span class="md-tag g">GM</span> Guru moudhyami, <span class="md-tag s">SM</span> Shukra moudhyami (planet within its combustion orb of the Sun): ${mperiods.map((p) => `${esc(p.short)} ${p.start ? esc(dateLabel(p.start.slice(0, 10))) : "\u2026"} \u2013 ${p.end ? esc(dateLabel(p.end.slice(0, 10))) : "\u2026"}`).join("; ")}.` : ""}</p>
+    <p class="hint">Tithi and nakshatra shown are those at sunrise, with their end time. Click a day for the full details. <span class="cal-dot danger"></span> Amavasya, <span class="cal-dot warn"></span> Krishna Chaturdashi or a Gandamoola nakshatra at sunrise (a birth then may need shanti; open the day's Panchanga for exact windows).${monthHasMoudhya ? ` <span class="md-tag g">GM</span> Guru moudhyami, <span class="md-tag s">SM</span> Shukra moudhyami (planet within its combustion orb of the Sun): ${mperiods.map((p) => `${esc(p.short)} ${p.start ? esc(dateLabel(p.start.slice(0, 10))) : "\u2026"} \u2013 ${p.end ? esc(dateLabel(p.end.slice(0, 10))) : "\u2026"}`).join("; ")}.` : ""}</p>
   </div>
   <div id="cal-day"></div>`;
   document.querySelectorAll(".cal-cell[data-date]").forEach((c) => c.addEventListener("click", () => {
@@ -122,10 +132,10 @@ function renderCalDay(d) {
       <table class="tbl">
         ${row(t("Sunrise") + " / " + t("Sunset"), `${tm(d.sunrise)} / ${tm(d.sunset)}`)}
         ${row(t("Moonrise") + " / " + t("Moonset"), `${tmRel(d.moonrise, d.date)} / ${tmRel(d.moonset, d.date)}`)}
-        ${row(t("Tithi"), (d.tithis && d.tithis.length ? d.tithis : [d.tithi]).map((x) => `${moonSVG(x.index, 14)} ${esc(trTithi(x.paksha || (x.index <= 15 ? "Shukla" : "Krishna"), x.name))} <span class="hint">until ${tmRel(x.end, d.date)}</span>`).join("<br>"))}
-        ${row(t("Nakshatra"), `${esc(tr("nakshatra", d.nakshatra.name))} <span class="hint">until ${tmRel(d.nakshatra.end, d.date)}</span>`)}
-        ${row(t("Yoga"), `${esc(tr("yoga", d.yoga.name))} <span class="hint">until ${tmRel(d.yoga.end, d.date)}</span>`)}
-        ${row(t("Karana"), `${esc(tr("karana", d.karana.name))} <span class="hint">until ${tmRel(d.karana.end, d.date)}</span>`)}
+        ${row(t("Tithi"), (d.tithis && d.tithis.length ? d.tithis : [d.tithi]).map((x) => `${moonSVG(x.index, 14)} ${esc(trTithi(x.paksha || (x.index <= 15 ? "Shukla" : "Krishna"), x.name))} <span class="hint">until ${tmRel(x.end, d.date)}</span>${withFlag(tithiFlag(x.index))}`).join("<br>"))}
+        ${row(t("Nakshatra"), `${esc(tr("nakshatra", d.nakshatra.name))} <span class="hint">until ${tmRel(d.nakshatra.end, d.date)}</span>${withFlag(nakFlag(d.nakshatra.name))}`)}
+        ${row(t("Yoga"), `${esc(tr("yoga", d.yoga.name))} <span class="hint">until ${tmRel(d.yoga.end, d.date)}</span>${withFlag(yogaFlag(d.yoga.name))}`)}
+        ${row(t("Karana"), `${esc(tr("karana", d.karana.name))} <span class="hint">until ${tmRel(d.karana.end, d.date)}</span>${withFlag(karanaFlag(d.karana.name))}`)}
         ${row("Moon " + t("Rashi"), `${esc(tr("rashi", d.moon_sign.name))} <span class="hint">until ${tmRel(d.moon_sign.end, d.date)}</span>`)}
         ${row("Sun " + t("Rashi"), esc(tr("rashi", d.sun_sign.name)))}
         ${row(t("Month"), esc(trMonth((d.month.adhika ? "Adhika " : "") + d.month.name)) + " (Amanta)")}
@@ -430,7 +440,8 @@ function renderTransits(r) {
   cells[nl].push({ t: abbr("Lagna"), cls: "asc", title: "Natal lagna" });
   cells[nm].push({ t: "\u263eN", cls: "natal", title: "Natal Moon" });
   r.planets.filter((p) => ORDER.includes(p.planet)).forEach((p) =>
-    cells[p.rashi.index].push({ t: abbr(p.planet) + (p.retrograde && !["Rahu", "Ketu"].includes(p.planet) ? "\u211E" : ""), cls: (p.favourable ? "fav" : "") + (p.retrograde && !["Rahu", "Ketu"].includes(p.planet) ? " r" : ""), title: tr("graha", p.planet) }));
+    cells[p.rashi.index].push({ t: abbr(p.planet) + (p.retrograde && !["Rahu", "Ketu"].includes(p.planet) ? "\u211E" : "") + (DEBIL_SIGN[p.planet] === p.rashi.index ? "\u2193" : ""),
+      cls: (p.favourable ? "fav" : "") + (p.retrograde && !["Rahu", "Ketu"].includes(p.planet) ? " r" : "") + (DEBIL_SIGN[p.planet] === p.rashi.index ? " deb" : ""), title: tr("graha", p.planet) }));
   const cp = r.current_saturn_phase;
   const verdict = (p) => p.favourable === undefined ? "" : p.favourable ? '<span class="good">favourable</span>'
     : p.vedha_by ? `<span class="warn">obstructed (vedha by ${esc(tr("graha", p.vedha_by))})</span>` : '<span class="bad">unfavourable</span>';
@@ -440,7 +451,7 @@ function renderTransits(r) {
   <div class="transit-top">
     <div class="card">
       <div class="card-head"><h3>Current Transit Positions</h3><span class="hint">${esc(dateLabel(r.transit_time))} ${hm(r.transit_time)}</span></div>
-      <div class="pos-list">${r.planets.map((p) => `<div class="pos-row"><span>${pdot(p.planet)}<b>${esc(tr("graha", p.planet))}</b></span><span>${esc(tr("rashi", p.rashi.name || RASHIS[p.rashi.index - 1]))}</span><span class="num">${dms(p.longitude % 30, false)}${p.retrograde && !["Rahu", "Ketu"].includes(p.planet) ? ' <span class="tagpill de">R</span>' : ""}</span><span class="hpill${p.favourable ? " good" : ""}" title="House from natal Moon">${p.house_from_moon}</span></div>`).join("")}</div>
+      <div class="pos-list">${r.planets.map((p) => `<div class="pos-row"><span>${pdot(p.planet)}<b>${esc(tr("graha", p.planet))}</b></span><span>${esc(tr("rashi", p.rashi.name || RASHIS[p.rashi.index - 1]))}</span><span class="num">${dms(p.longitude % 30, false)}${p.retrograde && !["Rahu", "Ketu"].includes(p.planet) ? ' <span class="tagpill de">R</span>' : ""}${withFlag(skyFlag(p.planet, p.rashi.index))}</span><span class="hpill${p.favourable ? " good" : ""}" title="House from natal Moon">${p.house_from_moon}</span></div>`).join("")}</div>
     </div>
     <div class="card wheel-card">${transitWheel(r)}<p class="hint center">Outer ring: transits now \u00b7 inner: natal planets \u00b7 line: natal lagna</p></div>
     <div class="quick-col">

@@ -270,7 +270,7 @@ function planetsTable(r) {
   return `<div class="tscroll"><table class="tt"><tr><th>${t("Planet") || "Planet"}</th><th>${t("Rashi")}</th><th>Degree</th><th>${t("Nakshatra")}</th><th>Motion</th></tr>
     ${r.sky.planets.filter((p) => ORDER.includes(p.planet) || (s.show_outer && OUTER.includes(p.planet))).map((p) => {
       const retro = p.retrograde && !["Rahu", "Ketu"].includes(p.planet);
-      return `<tr><td>${pdot(p.planet)}<b>${esc(tr("graha", p.planet))}</b></td><td>${esc(tr("rashi", p.rashi.name))}</td><td class="num">${esc(dms(p.longitude % 30, false))}</td>
+      return `<tr><td>${pdot(p.planet)}<b>${esc(tr("graha", p.planet))}</b></td><td>${esc(tr("rashi", p.rashi.name))}${withFlag(skyFlag(p.planet, p.rashi.index))}</td><td class="num">${esc(dms(p.longitude % 30, false))}</td>
         <td>${esc(tr("nakshatra", p.nakshatra.name))} <span class="hint">p${p.nakshatra.pada}</span></td>
         <td>${retro ? '<span class="tagpill de">R</span>' : '<span class="hint">direct</span>'}${p.combust ? ' <span class="tagpill warn" title="within combustion orb of the Sun">combust</span>' : ""}</td></tr>`;
     }).join("")}</table></div>`;
@@ -344,6 +344,7 @@ function renderTodayDash(r) {
       <div class="card"><div class="card-head"><h3>Planets now</h3><a class="link" href="#transits" data-tab-link="transits">Transits</a></div>${planetsTable(r)}</div>
     </div>
     ${(r.panchanga.namakshara || []).length ? `<div class="card" id="today-nama"><div class="card-head"><h3>Name letters today</h3><span class="hint">first syllable of the name for a baby born in each window (Moon's nakshatra pada)</span></div>${namaStrip(r.panchanga.namakshara, now, r.date)}</div>` : ""}
+    ${r.panchanga.shanti_windows ? `<div class="card" id="today-shanti"><div class="card-head"><h3>Shanti windows today</h3><span class="hint">a baby born in these times traditionally needs a shanti</span></div>${shantiWindows(r.panchanga.shanti_windows, now, r.date)}</div>` : ""}
     <div class="card" id="today-muhurta"><div class="card-head"><h3>Muhurtas</h3><a class="link" href="#muhurta" data-tab-link="muhurta">Muhurta finder</a></div>${muhurtaToday(r)}</div>
     <div class="today-grid2">
       <div class="card"><div class="card-head"><h3>Moudhyami</h3><span class="hint">Guru &amp; Shukra combustion, next 12 months</span></div>${moudhyaCard(r)}</div>
@@ -380,8 +381,8 @@ function renderDrawer() {
   const open = r.muhurta.open_today;
   body.innerHTML = `${nowBoxes(r, now)}
     <div class="dr-sec"><h4>Panchanga</h4>
-      ${row(t("Tithi"), esc(trTithi(ti.paksha, ti.name)), ti.end)}${row(t("Nakshatra"), esc(tr("nakshatra", nk.name)), nk.end)}
-      ${row(t("Yoga"), esc(tr("yoga", yo.name)), yo.end)}${row(t("Karana"), esc(tr("karana", ka.name)), ka.end)}
+      ${row(t("Tithi"), esc(trTithi(ti.paksha, ti.name)) + withFlag(tithiFlag(ti.index)), ti.end)}${row(t("Nakshatra"), esc(tr("nakshatra", nk.name)) + withFlag(nakFlag(nk.name)), nk.end)}
+      ${row(t("Yoga"), esc(tr("yoga", yo.name)) + withFlag(yogaFlag(yo.name)), yo.end)}${row(t("Karana"), esc(tr("karana", ka.name)) + withFlag(karanaFlag(ka.name)), ka.end)}
       ${row(t("Vara"), esc(tr("vara", pan.vara.name)), "")}${row(t("Month"), esc(tr("month", pan.lunar_month.name)) + (pan.lunar_month.adhika ? " (Adhika)" : "") + " \u00b7 " + esc(tr("paksha", pan.lunar_month.paksha)), "")}
     </div>
     <div class="dr-sec"><h4>Timings</h4>${dayWindows(pan).map((w) => `<div class="dr-row ${now >= w.end ? "dim" : ""}"><span><i class="wdot" style="--wc:${WIN_COLOR[w.key] || "#94a3b8"}"></i>${esc(w.label)}</span><b>${hm(w.start)} \u2013 ${tmRel(w.end, pan.date)}</b><em>${inWin(w, now) ? "now" : ""}</em></div>`).join("")}</div>
@@ -389,6 +390,7 @@ function renderDrawer() {
       : `<p class="hint">None today (${esc(Object.keys(r.muhurta.general_rejected_minutes || {}).slice(0, 2).map(reasonText).join(", "))}).</p>`}</div>
     <div class="dr-sec"><h4>Moudhyami</h4>${moudhyaRows(r.moudhya.status)}</div>
     ${(pan.namakshara || []).length ? `<div class="dr-sec"><h4>Name letters today</h4>${namaRows(pan.namakshara, now, pan.date)}</div>` : ""}
+    ${pan.shanti_windows ? `<div class="dr-sec"><h4>Shanti windows today</h4>${shantiWindows(pan.shanti_windows, now, pan.date)}</div>` : ""}
     ${r.personal ? `<div class="dr-sec"><h4>For ${esc(r.personal.name || r._natal.name || "you")}</h4>${row("Tarabala", esc(r.personal.tarabala.name) + (r.personal.tarabala.good ? " \u2713" : " \u2717"), "")}${row("Chandrabala", r.personal.chandrabala.house + (r.personal.chandrabala.good ? " \u2713" : " \u2717"), "")}</div>` : ""}
     ${fest.length ? `<div class="dr-sec"><h4>Festivals this week</h4>${fest.map((f) => `<div class="dr-row"><span>${esc(dateLabel(f.date))}</span><b>${esc(trFest(f))}</b><em></em></div>`).join("")}</div>` : ""}
     <div class="dr-actions"><a class="btn primary" href="#panchanga" data-tab-link="panchanga">${ico("panchanga")}Panchanga</a><a class="btn ghost" href="#muhurta" data-tab-link="muhurta">${ico("muhurta")}Muhurta</a></div>`;

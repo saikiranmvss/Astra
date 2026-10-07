@@ -307,7 +307,7 @@ function renderDashas() {
   <div class="dasha-grid">
     <div class="card">
       <div class="card-head"><h3>Current Dasha</h3><span class="hint">${esc(dateLabel(model.nowIso))}</span></div>
-      <div class="cur-list">${chain.map((n, i) => `<div class="cur-row${i === 0 ? " main" : ""}">${n.icon.replace("pdot-i", "pdot-i big")}<div><b>${esc(n.label)} ${lvlName(i)} Dasha</b><small>${fmtRange(n, i >= 2)}</small>
+      <div class="cur-list">${chain.map((n, i) => `<div class="cur-row${i === 0 ? " main" : ""}">${n.icon.replace("pdot-i", "pdot-i big")}<div><b>${esc(n.label)} ${lvlName(i)} Dasha${lordFlag(n.key)}</b><small>${fmtRange(n, i >= 2)}</small>
         ${i < 2 ? `<small class="rem">Remaining: ${span(model.nowMs, isoMs(n.end))}${i === 1 ? ` \u00b7 ${Math.max(0, Math.round((isoMs(n.end) - model.nowMs) / 86400000))} days left` : ""}</small>` : ""}</div>
         <div class="cur-bar"><span style="width:${Math.min(100, Math.max(0, (model.nowMs - isoMs(n.start)) / (isoMs(n.end) - isoMs(n.start)) * 100)).toFixed(1)}%"></span></div></div>`).join("") || '<p class="hint">Outside the computed range.</p>'}</div>
       <p class="hint">${esc(model.info)}</p>
@@ -434,7 +434,7 @@ function renderYogas() {
   let html = "";
   if (yogaTab === "yogas" || yogaTab === "doshas") {
     const list = r.yogas.filter((y) => (y.type === "dosha") === (yogaTab === "doshas"));
-    html = `<div class="card"><div class="card-head"><h3>${yogaTab === "yogas" ? "Yogas present" : "Doshas present"}</h3><span class="hint">Traditional definitions checked on calculated positions. Only existence is reported, no predictions.</span></div>
+    html = `${yogaTab === "doshas" ? shantiCard(r.shanti) : ""}<div class="card"><div class="card-head"><h3>${yogaTab === "yogas" ? "Yogas present" : "Doshas present"}</h3><span class="hint">Traditional definitions checked on calculated positions. Only existence is reported, no predictions.</span></div>
       ${list.length ? `<div class="yoga-grid">${list.map(card).join("")}</div>` : `<div class="empty-inline">${ico("check")}<div><b>None found</b><small>${yogaTab === "doshas" ? "None of the checked doshas are present in this chart." : "None of the checked yogas are present."}</small></div></div>`}</div>`;
   } else if (yogaTab === "shadbala") {
     const sb = r.shadbala, comps = ["sthana", "dig", "kala", "cheshta", "naisargika", "drik"];
@@ -541,7 +541,10 @@ function chartReport(r) {
       <h2>Birth details</h2>${kv([["Name", esc(r.input.name || "\u2014")], ["Date", esc(longDate(r.input.date))], ["Time", esc(r.input.time) + " (UTC" + fmtOffset(r.input.tz_minutes) + ")"],
         ["Place", esc(r.input.place || "\u2014")], ["Coordinates", r.input.lat.toFixed(4) + ", " + r.input.lon.toFixed(4)], ["Ayanamsa", esc(r.profile.ayanamsa)], ["Rahu / Ketu", String(r.profile.node) === "mean" ? "Mean node" : "True (osculating) node"]])}
       <h2>Panchanga at birth</h2>${kv([[t("Tithi"), esc(trTithi(bp.tithi.paksha, bp.tithi.name))], [t("Nakshatra"), esc(tr("nakshatra", r.chart.grahas.Moon.nakshatra.name)) + " pada " + r.chart.grahas.Moon.nakshatra.pada],
-        [t("Yoga"), esc(tr("yoga", bp.yoga.name))], [t("Karana"), esc(tr("karana", bp.karana.name))], [t("Vara"), esc(tr("vara", bp.vara.name))], [t("Month"), esc(tr("month", bp.lunar_month.name))]].concat(r.namakshara ? [["Name letter", esc(sylAll(r.namakshara))]] : []))}
+        [t("Yoga"), esc(tr("yoga", bp.yoga.name))], [t("Karana"), esc(tr("karana", bp.karana.name))], [t("Vara"), esc(tr("vara", bp.vara.name))], [t("Month"), esc(tr("month", bp.lunar_month.name))]].concat(r.namakshara ? [["Name letter", esc(sylAll(r.namakshara))]] : [])
+          .concat(r.nature ? [["Gana (Gunam)", esc(`${r.nature.gana.name} (${r.nature.gana.meaning}) \u00b7 ${r.nature.gati.name} star \u00b7 ${r.nature.yoni.animal} yoni \u00b7 ${r.nature.nadi} nadi`)],
+            ["Nature", esc(r.nature.traits)]] : [])
+          .concat(r.shanti ? [["Shanti", esc(r.shanti.title) + (r.shanti.items.filter((i) => i.level !== "info").length ? ": " + esc(r.shanti.items.filter((i) => i.level !== "info").map((i) => i.name + " (" + i.detail + ")").join("; ")) : "")]] : []))}
     </div><div class="rep-charts"><div><h3>Rasi (D1)</h3>${chartFor(r, "D1", s.chart_style)}</div><div><h3>Navamsha (D9)</h3>${chartFor(r, "D9", s.chart_style)}</div></div></section>
     <section><h2>Planetary positions</h2>${chartDetailsTable(r, "D1")}</section>
     <section><h2>Current Vimshottari periods</h2>${kv(chain.map((n, i) => [["Maha", "Antar", "Pratyantar", "Sukshma", "Prana"][i], esc(n.label) + " \u00b7 " + fmtRange(n, i >= 2)]))}</section>

@@ -118,6 +118,109 @@ function namaCard(nm) {
 }
 const pdot = (k, big) => `<span class="pdot-i${big ? " big" : ""}" style="--pc:${PCOLOR[k] || "#7c6cff"}">${GLYPH[k] || esc(String(k).slice(0, 2))}</span>`;
 
+/* ---------- caution flags: shanti, afflicted planets, inauspicious panchanga ---------- */
+const FLAG_ICON = { danger: "\u26a0", warn: "!", info: "i" };
+const flag = (level, text, title) => `<span class="flag ${level}"${title ? ` title="${esc(title)}"` : ""}><i>${FLAG_ICON[level] || "!"}</i>${esc(text)}</span>`;
+const GANDAMOOLA_NAK = new Set(["Ashwini", "Ashlesha", "Magha", "Jyeshtha", "Mula", "Revati"]);
+const STRONG_BAD_YOGA = new Set(["Vyatipata", "Vaidhriti"]);
+const MINOR_BAD_YOGA = new Set(["Vishkambha", "Atiganda", "Shula", "Ganda", "Vyaghata", "Vajra", "Parigha"]);
+const DEBIL_SIGN = { Sun: 7, Moon: 8, Mars: 4, Mercury: 12, Jupiter: 10, Venus: 6, Saturn: 1 };
+const nakFlag = (name) => (GANDAMOOLA_NAK.has(name) ? flag("warn", "Gandamoola", "A birth in this nakshatra traditionally calls for Gandamoola shanti") : "");
+function tithiFlag(index) {
+  if (index === 30) return flag("danger", "Amavasya", "New Moon: avoided for auspicious work; a birth now calls for Darsha shanti");
+  if (index === 29) return flag("warn", "Krishna Chaturdashi", "Rikta tithi; a birth now traditionally calls for shanti");
+  if ([4, 9, 14, 19, 24].includes(index)) return flag("info", "Rikta", "Rikta tithi: avoided for auspicious work");
+  return "";
+}
+const yogaFlag = (name) => (STRONG_BAD_YOGA.has(name) ? flag("warn", name, "Inauspicious yoga; a birth now traditionally calls for shanti")
+  : MINOR_BAD_YOGA.has(name) ? flag("info", "inauspicious", "Avoided for auspicious work") : "");
+const karanaFlag = (name) => (name === "Vishti" ? flag("warn", "Bhadra", "Vishti (Bhadra) karana: avoided for auspicious work") : "");
+/* flag of one panchanga element: cat is tithi | nakshatra | yoga | karana */
+const elemFlag = (cat, x) => (!x ? "" : cat === "tithi" ? tithiFlag(x.index) : cat === "nakshatra" ? nakFlag(x.name) : cat === "yoga" ? yogaFlag(x.name) : cat === "karana" ? karanaFlag(x.name) : "");
+const withFlag = (f) => (f ? " " + f : "");
+/* a transiting planet in its sign of debilitation (sign index 1-12) */
+const skyFlag = (planet, sign) => (DEBIL_SIGN[planet] === sign ? flag("danger", "debilitated", `${planet} is in its sign of debilitation`) : "");
+/* afflictions of a natal planet: [{level, text, title}] */
+function planetIssues(k, x) {
+  const out = [];
+  if (!x || k === "Lagna") return out;
+  if (x.dignity === "debilitated") out.push({ level: "danger", text: "debilitated", title: `${k} is in its sign of debilitation` });
+  if (x.combust) out.push({ level: "warn", text: "combust", title: `${k} is within its combustion orb of the Sun` });
+  if (x.house_whole_sign === 8) out.push({ level: "warn", text: "8th house", title: "Placed in the 8th house (dusthana)" });
+  return out;
+}
+const issueFlags = (list) => list.map((i) => flag(i.level, i.text, i.title)).join(" ");
+const rowLevel = (list) => (list.some((i) => i.level === "danger") ? " row-danger" : list.some((i) => i.level === "warn") ? " row-warn" : "");
+/* a natal lord's affliction as one small flag (dashas, reports) */
+function lordFlag(lord) {
+  const g = lastChart && lastChart.chart.grahas[lord];
+  const top = planetIssues(lord, g).filter((i) => i.level !== "info")[0];
+  return top ? " " + flag(top.level, top.text, top.title + " in the birth chart") : "";
+}
+const SH_ORDER = { danger: 0, warn: 1, info: 2 };
+/* shanti finding of the given keys from a chart's shanti check, as a flag */
+function shFlag(sh, keys) {
+  const it = sh && sh.items.filter((i) => keys.includes(i.key)).sort((a, b) => SH_ORDER[a.level] - SH_ORDER[b.level])[0];
+  return it ? " " + flag(it.level, it.name, it.detail) : "";
+}
+function shantiCard(sh) {
+  if (!sh) return "";
+  const ret = sh.nakshatra_return;
+  const n = sh.items.filter((i) => i.level !== "info").length;
+  const icon = sh.level === "ok" ? ico("check") : ico("info");
+  const sub = sh.level === "ok"
+    ? "None of the janana dosha rules apply to this birth moment."
+    : `${n} finding${n === 1 ? "" : "s"}${ret ? ` \u00b7 the Moon returns to ${esc(tr("nakshatra", ret.nakshatra))} on <b>${esc(dt(ret.start))}</b>, the usual day for the shanti` : ""}`;
+  return `
+  <div class="card shanti-card">
+    <div class="card-head"><h3>Shanti check</h3><span class="hint">Janana dosha \u00b7 traditional rules on the calculated birth moment</span></div>
+    <div class="sh-verdict ${sh.level}">${icon}<div><b>${esc(sh.title)}</b><small>${sub}</small></div></div>
+    ${sh.items.length ? `<div class="sh-list">${sh.items.map((i) => `<div class="sh-item ${i.level}">${flag(i.level, i.level === "danger" ? "Shanti" : i.level === "warn" ? "Caution" : "Note")}
+      <div><b>${esc(i.name)}</b> <span>${esc(i.detail)}</span>${i.level !== "info" && i.remedy ? `<small>Remedy: ${esc(i.remedy)}</small>` : ""}${i.rule ? `<small class="hint">${esc(i.rule)}</small>` : ""}</div></div>`).join("")}</div>` : ""}
+    <p class="hint">Checked: Gandamoola, nakshatra / tithi / lagna gandanta, Abhukta Mula, Amavasya, Krishna Chaturdashi, Vishti, Vyatipata / Vaidhriti, Varjyam, Sankranti, eclipse. Not checked: ${esc(sh.not_checked)} Traditions differ; confirm with your family priest.</p>
+  </div>`;
+}
+const GANA_OF_NAK = "DMRMDMDDRRMMDRDRDRRMMDRRMMD";
+const NAK_ORDER = ["Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha", "Magha", "Purva Phalguni",
+  "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha", "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana",
+  "Dhanishtha", "Shatabhisha", "Purva Bhadrapada", "Uttara Bhadrapada", "Revati"];
+const ganaOf = (nak) => ({ D: "Deva", M: "Manushya", R: "Rakshasa" })[GANA_OF_NAK[NAK_ORDER.indexOf(nak)]] || "";
+const ganaHint = (nak) => { const g = ganaOf(nak); return g ? ` <span class="gana ${g.toLowerCase()}" title="Gana (gunam) of the nakshatra"><small>${g} gana</small></span>` : ""; };
+/* nature of the birth star (janma nakshatra gunam) */
+const ganaPill = (g) => `<span class="gana ${g.name.toLowerCase()}" title="${esc(g.text)}">${esc(g.name)} <small>${esc(g.meaning)}</small></span>`;
+function natureCard(n) {
+  if (!n) return "";
+  const cell = (k, v, s) => `<div class="nat-c"><small>${k}</small><b>${v}</b>${s ? `<span>${esc(s)}</span>` : ""}</div>`;
+  return `
+  <div class="card nature-card">
+    <div class="card-head"><h3>Nature of the birth star</h3><span class="hint">Janma nakshatra gunam \u00b7 ${esc(tr("nakshatra", n.nakshatra))}</span></div>
+    <div class="nat-top">
+      <div class="nat-gana ${n.gana.name.toLowerCase()}"><small>Gana (Gunam)</small><b>${esc(n.gana.name)} gana</b><em>${esc(n.gana.meaning)} temperament</em></div>
+      <p class="nat-traits"><b>${esc(n.traits)}</b><span>${esc(n.gana.text)}</span><span>${esc(n.gati.name)} (${esc(n.gati.meaning)}) star: ${esc(n.gati.text)}</span></p>
+    </div>
+    <div class="nat-grid">
+      ${cell("Yoni (animal)", esc(n.yoni.animal), n.yoni.gender)}
+      ${cell("Deity", esc(n.deity), "")}
+      ${cell("Symbol", esc(n.symbol), "")}
+      ${cell("Star lord", esc(tr("graha", n.lord)), "")}
+      ${cell("Nadi", esc(n.nadi), "")}
+      ${n.varna ? cell("Varna", esc(n.varna), "from Moon sign") : ""}
+      ${n.vashya ? cell("Vashya", esc(n.vashya), "from Moon sign") : ""}
+    </div>
+    <p class="hint">${esc(n.note)} Gana, yoni and nadi are the same values used in marriage matching.</p>
+  </div>`;
+}
+/* windows of a day in which a birth needs shanti (panchanga, today) */
+function shantiWindows(list, now, day) {
+  if (!list || !list.length) return `<div class="empty-inline">${ico("check")}<div><b>No shanti windows</b><small>A birth at any time this day raises no janana dosha.</small></div></div>`;
+  return `<div class="shw-list">${list.map((w) => {
+    const on = now && w.start <= now && now < w.end;
+    return `<div class="shw-row ${w.level}${on ? " on" : ""}" title="${esc(w.remedy || "")}">${flag(w.level, w.level === "danger" ? "Shanti" : "Caution")}
+      <span class="shw-n"><b>${esc(w.name)}</b>${w.note ? `<small>${esc(w.note)}</small>` : ""}</span>
+      <span class="shw-t">${tmRel(w.start, day)} \u2013 ${tmRel(w.end, day)}${on ? "<em>now</em>" : ""}</span></div>`;
+  }).join("")}</div>`;
+}
+
 /* group a label's caption nodes into one element so the layout keeps them on one line */
 function wrapLabels(root) {
   (root || document).querySelectorAll(".form label:not(.inline):not(.chk):not(.file-btn):not(.set-row):not(.toggle-row)").forEach((lb) => {
@@ -827,19 +930,25 @@ function chartPoints(r, varga) {
     const keys = ORDER.concat(s.show_outer ? OUTER : []);
     return keys.map((k) => {
       const x = k === "Lagna" ? r.chart.lagna : g[k];
-      return { k, sign: x.rashi.index, deg: x.rashi.degrees_in_sign, retro: k !== "Lagna" && x.retrograde && !["Rahu", "Ketu"].includes(k), nak: x.nakshatra, lon: x.longitude };
+      return { k, sign: x.rashi.index, deg: x.rashi.degrees_in_sign, retro: k !== "Lagna" && x.retrograde && !["Rahu", "Ketu"].includes(k), nak: x.nakshatra, lon: x.longitude,
+        deb: x.dignity === "debilitated", combust: !!x.combust, issues: planetIssues(k, x) };
     });
   }
   const v = r.vargas[varga].positions;
-  return ORDER.map((k) => ({ k, sign: v[k].sign_index, deg: v[k].degree, retro: k !== "Lagna" && g[k] && g[k].retrograde && !["Rahu", "Ketu"].includes(k), lord: v[k].lord }));
+  return ORDER.map((k) => {
+    const deb = DEBIL_SIGN[k] === v[k].sign_index;
+    return { k, sign: v[k].sign_index, deg: v[k].degree, retro: k !== "Lagna" && g[k] && g[k].retrograde && !["Rahu", "Ketu"].includes(k), lord: v[k].lord,
+      deb, issues: deb ? [{ level: "danger", text: "debilitated", title: `${k} is in its sign of debilitation in ${varga}` }] : [] };
+  });
 }
 function chartCells(points) {
   const s = settings();
   const cells = {};
   for (let i = 1; i <= 12; i++) cells[i] = [];
   for (const p of points) {
-    const t = abbr(p.k) + (p.retro && s.show_retro ? "\u211E" : "") + (s.show_deg && p.deg != null ? " " + Math.floor(p.deg) + "\u00b0" : "");
-    cells[p.sign].push({ t, cls: (p.k === "Lagna" ? "asc" : "") + (p.retro && s.show_retro ? " r" : ""), title: tr("graha", p.k) + (p.deg != null ? " " + dms(p.deg, false) : "") });
+    const t = abbr(p.k) + (p.retro && s.show_retro ? "\u211E" : "") + (p.deb ? "\u2193" : "") + (s.show_deg && p.deg != null ? " " + Math.floor(p.deg) + "\u00b0" : "");
+    cells[p.sign].push({ t, cls: (p.k === "Lagna" ? "asc" : "") + (p.retro && s.show_retro ? " r" : "") + (p.deb ? " deb" : "") + (p.combust ? " cmb" : ""),
+      title: tr("graha", p.k) + (p.deg != null ? " " + dms(p.deg, false) : "") + (p.deb ? " \u00b7 debilitated" : "") + (p.combust ? " \u00b7 combust" : "") });
   }
   return cells;
 }
@@ -853,11 +962,12 @@ function chartDetailsTable(r, varga) {
   const pts = chartPoints(r, varga);
   return `<div class="scroll"><table class="tbl details">
     <tr><th>${t("Planet")}</th><th>${t("Rashi")}</th><th>Degree</th>${varga === "D1" ? `<th>${t("Nakshatra")}</th>` : "<th>Lord</th>"}</tr>
-    ${pts.map((p) => `<tr><td>${pdot(p.k)}<b>${esc(p.k === "Lagna" ? "Ascendant" : tr("graha", p.k))}</b>${p.retro ? ' <span class="tagpill de">R</span>' : ""}</td>
+    ${pts.map((p) => `<tr class="${rowLevel(p.issues || []).trim()}"><td>${pdot(p.k)}<b>${esc(p.k === "Lagna" ? "Ascendant" : tr("graha", p.k))}</b>${p.retro ? ' <span class="tagpill de">R</span>' : ""} ${issueFlags((p.issues || []).filter((i) => i.level !== "info"))}</td>
       <td>${esc(tr("rashi", RASHIS[p.sign - 1]))}${LANG === "en" ? ` <span class="hint">${WEST[p.sign - 1]}</span>` : ""}</td><td class="num">${dms(p.deg, false)}</td>
       <td>${varga === "D1" ? esc(tr("nakshatra", p.nak.name)) + " " + p.nak.pada : esc(tr("graha", p.lord || ""))}</td></tr>`).join("")}
   </table></div>`;
 }
+const chartLegend = () => `<p class="chart-legend"><span class="r">\u211E retrograde</span><span class="deb">\u2193 debilitated</span><span class="cmb">orange: combust</span></p>`;
 function chartPlaceholder(text) {
   const empty = {};
   return `<div class="chart-empty">${northSVG(empty, 1)}<div class="ce-msg">${ico("chart")}<span>${text}</span></div></div>`;
@@ -904,7 +1014,7 @@ function dignityPill(d) {
 }
 function dashaTree(nodes, depth) {
   return nodes.map((n) => {
-    const label = `<span class="lord${n.current ? " cur" : ""}">${pdot(n.lord)}${esc(tr("graha", n.lord))}</span><span class="dates">${dt(n.start)} \u2192 ${dt(n.end)}</span>${depth === 0 && n.balance_at_birth ? `<span class="hint">balance at birth ${n.balance_at_birth.toFixed(4)} y</span>` : ""}`;
+    const label = `<span class="lord${n.current ? " cur" : ""}">${pdot(n.lord)}${esc(tr("graha", n.lord))}${depth === 0 ? lordFlag(n.lord) : ""}</span><span class="dates">${dt(n.start)} \u2192 ${dt(n.end)}</span>${depth === 0 && n.balance_at_birth ? `<span class="hint">balance at birth ${n.balance_at_birth.toFixed(4)} y</span>` : ""}`;
     if (n.sub) return `<details class="dasha"${n.current ? " open" : ""}><summary>${label}</summary><div class="inner">${dashaTree(n.sub, depth + 1)}</div></details>`;
     return `<div class="dasha leaf"><span class="lord${n.current ? " cur" : ""}">${esc(tr("graha", n.lord))}</span><span class="dates">${dt(n.start)} \u2192 ${dt(n.end)}</span></div>`;
   }).join("");
@@ -917,7 +1027,7 @@ function renderChartVisual(r) {
   sel.innerHTML = Object.keys(r.vargas).map((k) => `<option value="${k}"${k === currentVarga ? " selected" : ""}>${k} \u00b7 ${esc(r.vargas[k].name)}</option>`).join("");
   document.getElementById("chart-title").textContent = currentVarga === "D1" ? "Rasi Chart" : currentVarga + " " + r.vargas[currentVarga].name;
   document.getElementById("chart-visual").innerHTML = chartFor(r, currentVarga);
-  document.getElementById("chart-details").innerHTML = `<h4 class="mini-title">Chart Details</h4>` + chartDetailsTable(r, currentVarga);
+  document.getElementById("chart-details").innerHTML = `<h4 class="mini-title">Chart Details</h4>` + chartDetailsTable(r, currentVarga) + chartLegend();
 }
 
 function renderChart(r) {
@@ -932,6 +1042,8 @@ function renderChart(r) {
   const warnLagna = minsTo(lagMargin) < 10;
   const cd = r.chara_dasha;
   const nm = r.namakshara;
+  const sh = r.shanti;
+  const nat = r.nature;
   const st = r.sun_times || {};
   const sec = (name, html) => `<div data-sec="${name}"${name === chartSub ? "" : " hidden"}>${html}</div>`;
   renderChartVisual(r);
@@ -941,22 +1053,24 @@ function renderChart(r) {
     <div class="card-head"><h3>${esc(r.input.name || "Birth chart")}<span class="hint"> \u00b7 ${esc(longDate(r.input.date))} ${esc(r.input.time)}${r.input.place ? " \u00b7 " + esc(r.input.place) : ""}</span></h3>
       <div class="row-actions"><button type="button" class="ghost" id="dl-json">${ico("download")}JSON</button><button type="button" class="ghost" data-report="chart">${ico("print")}Report</button></div></div>
     <div class="summary">
-      <div class="stat"><div class="k">${t("Lagna")}</div><div class="v">${esc(rashiName(L.rashi))} ${dms(L.rashi.degrees_in_sign, false)}</div><div class="s">${esc(nakName(L.nakshatra))} p${L.nakshatra.pada}${warnLagna ? ' \u00b7 <span class="warn">near sign edge</span>' : ""}</div></div>
-      <div class="stat"><div class="k">Janma ${t("Nakshatra")}</div><div class="v">${esc(nakName(moon.nakshatra))}</div><div class="s">pada ${moon.nakshatra.pada} \u00b7 lord ${esc(tr("graha", moon.nakshatra.lord))}</div></div>
+      <div class="stat"><div class="k">${t("Lagna")}</div><div class="v">${esc(rashiName(L.rashi))} ${dms(L.rashi.degrees_in_sign, false)}</div><div class="s">${esc(nakName(L.nakshatra))} p${L.nakshatra.pada}${warnLagna ? ' \u00b7 <span class="warn">near sign edge</span>' : ""}${shFlag(sh, ["lagna_gandanta"])}</div></div>
+      <div class="stat"><div class="k">Janma ${t("Nakshatra")}</div><div class="v">${esc(nakName(moon.nakshatra))}</div><div class="s">pada ${moon.nakshatra.pada} \u00b7 lord ${esc(tr("graha", moon.nakshatra.lord))}${shFlag(sh, ["abhukta_mula", "nakshatra_gandanta", "gandamoola"])}</div></div>
       <div class="stat"><div class="k">Janma ${t("Rashi")}</div><div class="v">${esc(rashiName(moon.rashi))}</div><div class="s">Moon ${dms(moon.rashi.degrees_in_sign, false)}</div></div>
+      ${nat ? `<div class="stat"><div class="k">Gana (Gunam)</div><div class="v">${ganaPill(nat.gana)}</div><div class="s">${esc(nat.gati.name)} (${esc(nat.gati.meaning.toLowerCase())}) \u00b7 ${esc(nat.yoni.animal)} yoni</div></div>` : ""}
+      ${sh ? `<div class="stat sh-stat ${sh.level}"><div class="k">Shanti</div><div class="v">${esc(sh.level === "ok" ? "Not needed" : sh.level === "danger" ? "Advised" : "Commonly advised")}</div><div class="s">${esc(sh.items.filter((i) => i.level !== "info").map((i) => i.name).join(", ") || "no janana dosha")}</div></div>` : ""}
       ${nm ? `<div class="stat"><div class="k">Name letter</div><div class="v">${esc(sylOf(nm))} <span class="sv-all">${esc(sylAll(nm))}</span></div><div class="s">${esc(tr("nakshatra", nm.nakshatra))} pada ${nm.pada}${nm.near_boundary ? ' \u00b7 <span class="warn">near pada edge</span>' : ""}</div></div>` : ""}
       <div class="stat"><div class="k">D10 / D9 lagna</div><div class="v">${esc(tr("rashi", r.vargas.D10.positions.Lagna.sign))} / ${esc(tr("rashi", r.vargas.D9.positions.Lagna.sign))}</div><div class="s">Dashamsha / Navamsha</div></div>
       <div class="stat"><div class="k">Vimshottari now</div><div class="v">${esc(cur || "\u2014")}</div><div class="s">Maha \u203a Antar \u203a Pratyantar</div></div>
       <div class="stat"><div class="k">Chara dasha now</div><div class="v">${esc((cd.current || []).map((x) => tr("rashi", x)).join(" \u203a ") || "\u2014")}</div><div class="s">${esc(cd.direction)} order</div></div>
-      <div class="stat"><div class="k">Birth ${t("Tithi")}</div><div class="v">${esc(trTithi(bp.tithi.paksha, bp.tithi.name))}</div><div class="s">${esc(tr("vara", bp.vara.name))} \u00b7 ${esc(tr("month", bp.lunar_month.name))}${bp.lunar_month.adhika ? " (Adhika)" : ""}</div></div>
-      <div class="stat"><div class="k">${t("Yoga")} \u00b7 ${t("Karana")}</div><div class="v">${esc(tr("yoga", bp.yoga.name))}</div><div class="s">${esc(tr("karana", bp.karana.name))}</div></div>
+      <div class="stat"><div class="k">Birth ${t("Tithi")}</div><div class="v">${esc(trTithi(bp.tithi.paksha, bp.tithi.name))}</div><div class="s">${esc(tr("vara", bp.vara.name))} \u00b7 ${esc(tr("month", bp.lunar_month.name))}${bp.lunar_month.adhika ? " (Adhika)" : ""}${shFlag(sh, ["amavasya", "chaturdashi", "tithi_gandanta"])}</div></div>
+      <div class="stat"><div class="k">${t("Yoga")} \u00b7 ${t("Karana")}</div><div class="v">${esc(tr("yoga", bp.yoga.name))}</div><div class="s">${esc(tr("karana", bp.karana.name))}${shFlag(sh, ["vishti", "yoga"])}</div></div>
       <div class="stat"><div class="k">${t("Sunrise")} \u00b7 ${t("Sunset")}</div><div class="v">${tm(st.sunrise)} \u00b7 ${tm(st.sunset)}</div><div class="s">Hindu day: ${esc(tr("vara", st.hindu_weekday))}</div></div>
       <div class="stat"><div class="k">Ayanamsa (true)</div><div class="v">${dms(c.ayanamsa.true)}</div><div class="s">${esc(r.profile.ayanamsa.split("(")[0])}</div></div>
     </div>
   </div>`;
 
   const keys = ORDER.slice(1).concat(s.show_outer ? OUTER : []);
-  const overview = `
+  const overview = `${shantiCard(sh)}
   <div class="card">
     <div class="card-head"><h3>Grahas</h3><span class="hint">Sidereal, ${esc(r.profile.node)} node</span></div>
     <div class="scroll"><table class="tbl">
@@ -964,12 +1078,13 @@ function renderChart(r) {
       <tr><td>${pdot("Lagna")}<b>${esc(tr("graha", "Lagna"))}</b></td><td>${signDeg(L.longitude)}</td><td>${esc(nakName(L.nakshatra))}</td><td>${L.nakshatra.pada}</td><td>${esc(tr("graha", L.nakshatra.lord))}</td><td>1</td><td>${(L.speed_deg_per_min * 1440).toFixed(1)}</td><td></td></tr>
       ${keys.map((k) => {
         const x = g[k];
+        const iss = planetIssues(k, x);
         const state = [x.retrograde && !["Rahu", "Ketu"].includes(k) ? '<span class="tagpill de">R</span>' : "",
-          x.combust ? '<span class="tagpill de">combust</span>' : "", dignityPill(x.dignity)].join(" ");
-        return `<tr><td>${pdot(k)}<b>${esc(tr("graha", k))}</b></td><td>${signDeg(x.longitude)}</td><td>${esc(nakName(x.nakshatra))}</td><td>${x.nakshatra.pada}</td><td>${esc(tr("graha", x.nakshatra.lord))}</td><td>${x.house_whole_sign}${x.house_sripati !== x.house_whole_sign ? ` <span class="hint">(bhava ${x.house_sripati})</span>` : ""}</td><td>${x.speed_deg_per_day.toFixed(4)}</td><td>${state}</td></tr>`;
+          x.dignity !== "debilitated" ? dignityPill(x.dignity) : "", issueFlags(iss)].join(" ");
+        return `<tr class="${rowLevel(iss).trim()}"><td>${pdot(k)}<b>${esc(tr("graha", k))}</b></td><td>${signDeg(x.longitude)}</td><td>${esc(nakName(x.nakshatra))}</td><td>${x.nakshatra.pada}</td><td>${esc(tr("graha", x.nakshatra.lord))}</td><td>${x.house_whole_sign}${x.house_sripati !== x.house_whole_sign ? ` <span class="hint">(bhava ${x.house_sripati})</span>` : ""}</td><td>${x.speed_deg_per_day.toFixed(4)}</td><td>${state}</td></tr>`;
       }).join("")}
     </table></div>
-  </div>${nm ? namaCard(nm) : ""}`;
+  </div>${nm ? namaCard(nm) : ""}${natureCard(nat)}`;
 
   const into = moon.nakshatra.degrees_into;
   const trace = `
@@ -1061,7 +1176,7 @@ panchForm.querySelector(".today-btn").addEventListener("click", () => { panchFor
 rerender.panchanga = () => { if (lastPanch) { renderPanchanga(lastPanch); if (lastPanchUpcoming) renderPanchUpcoming(lastPanch, lastPanchUpcoming); } };
 
 function intervalRows(list, cat, extra) {
-  return list.map((x) => `<tr><td><b>${esc(cat === "tithi" ? trTithi(x.paksha, x.name) : tr(cat, x.name))}</b>${extra ? " " + extra(x) : ""}</td><td>${dt(x.start)}</td><td>${dt(x.end)}</td></tr>`).join("");
+  return list.map((x) => `<tr><td><b>${esc(cat === "tithi" ? trTithi(x.paksha, x.name) : tr(cat, x.name))}</b>${extra ? " " + extra(x) : ""}${withFlag(elemFlag(cat, x))}</td><td>${dt(x.start)}</td><td>${dt(x.end)}</td></tr>`).join("");
 }
 const range = (w) => (w ? `${tm(w.start)} \u2013 ${tm(w.end)}` : "\u2014");
 const lonOf = (x) => (typeof x === "number" ? x : x && (x.longitude ?? x.lon));
@@ -1086,10 +1201,10 @@ function renderPanchanga(r) {
     <div class="card">
       <div class="card-head"><h3>${isToday ? "Today\u2019s" : esc(longDate(r.date))} Panchanga</h3><span class="hint">${esc(r._place || "")}${r._place ? " \u00b7 " : ""}${isToday ? "now" : "at sunrise"}</span></div>
       <div class="pl">
-        ${row(moonSVG(ti.index || 1, 22), "", t("Tithi"), esc(trTithi(ti.paksha, ti.name)), ti.end)}
-        ${row(ico("star"), "c-nak", t("Nakshatra"), esc(tr("nakshatra", nk.name)) + ` <span class="hint">${esc(tr("graha", nk.lord))}</span>`, nk.end)}
-        ${row(ico("yogas"), "c-yoga", t("Yoga"), esc(tr("yoga", yo.name)), yo.end)}
-        ${row(ico("dashboard"), "c-kar", t("Karana"), esc(tr("karana", ka.name)), ka.end)}
+        ${row(moonSVG(ti.index || 1, 22), "", t("Tithi"), esc(trTithi(ti.paksha, ti.name)) + withFlag(tithiFlag(ti.index)), ti.end)}
+        ${row(ico("star"), "c-nak", t("Nakshatra"), esc(tr("nakshatra", nk.name)) + ` <span class="hint">${esc(tr("graha", nk.lord))}</span>` + ganaHint(nk.name) + withFlag(nakFlag(nk.name)), nk.end)}
+        ${row(ico("yogas"), "c-yoga", t("Yoga"), esc(tr("yoga", yo.name)) + withFlag(yogaFlag(yo.name)), yo.end)}
+        ${row(ico("dashboard"), "c-kar", t("Karana"), esc(tr("karana", ka.name)) + withFlag(karanaFlag(ka.name)), ka.end)}
         ${row(ico("panchanga"), "c-vara", t("Vara"), esc(tr("vara", r.vara.name)) + ` <span class="hint">lord ${esc(tr("graha", r.vara.lord))}</span>`, "")}
       </div>
       <div class="sun-grid">
@@ -1107,6 +1222,7 @@ function renderPanchanga(r) {
       </div>
       ${r.moudhya ? `<div class="card"><div class="card-head"><h3>Moudhyami</h3><span class="hint">Guru &amp; Shukra combustion</span></div>${moudhyaRows(r.moudhya)}</div>` : ""}
       ${r.namakshara && r.namakshara.length ? `<div class="card"><div class="card-head"><h3>Name letters</h3><span class="hint">for babies born this day</span></div>${namaRows(r.namakshara, nowLocalIso(r.tz_minutes), r.date)}<p class="hint">Moon's nakshatra pada from sunrise to the next sunrise; each pada gives the first syllable of the name.</p></div>` : ""}
+      ${r.shanti_windows ? `<div class="card"><div class="card-head"><h3>Shanti windows</h3><span class="hint">a birth in these times calls for shanti</span></div>${shantiWindows(r.shanti_windows, isToday ? nowLocalIso(r.tz_minutes) : "", r.date)}<p class="hint">Traditional janana dosha rules from sunrise to the next sunrise. Hover a row for the remedy.</p></div>` : ""}
       <div class="card">
         <div class="card-head"><h3>Lunar Month &amp; Festivals</h3></div>
         <div class="month-pill"><span><b>${esc(tr("month", r.lunar_month.name))}${r.lunar_month.adhika ? " (Adhika)" : ""}</b> \u00b7 ${esc(tr("paksha", r.lunar_month.paksha))}</span><small>${esc(tr("ritu", r.lunar_month.ritu))} \u00b7 ${esc(tr("samvatsara", r.year.samvatsara))} \u00b7 Shaka ${r.year.shaka}</small></div>

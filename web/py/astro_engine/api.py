@@ -151,6 +151,10 @@ def birth_chart(p):
                       {k: g[k]["speed_deg_per_day"] for k in g})
     cd = chara_dasha.compute(sign_of(chart["lagna"]["longitude"]), sid, jd_utc, tz, now_jd)
     up = upagraha.compute(ctx, chart, jd_utc, sun_times, sun_ha, hindu_wd, lat, lon, fmt_local)
+    from . import shanti
+    sh = shanti.check_birth(eng, jd_utc, tz, lat, lon, chart["lagna"]["longitude"], fmt_local)
+    from . import nature
+    nat = nature.for_moon(sid["Moon"])
 
     return {
         "engine": "astro_engine " + ENGINE_VERSION,
@@ -175,6 +179,8 @@ def birth_chart(p):
         "upagrahas": up,
         "birth_panchanga": bp,
         "namakshara": nama,
+        "shanti": sh,
+        "nature": nat,
         "sun_times": {"sunrise": fmt_local(sr), "sunset": fmt_local(ss),
                       "next_sunrise": fmt_local(nsr), "previous_sunset": fmt_local(pss),
                       "hindu_weekday": T.VARAS[hindu_wd]},
@@ -191,6 +197,8 @@ def birth_chart(p):
             "upagrahas": "DERIVED (BPHS / Phaladeepika profiles)",
             "dignity_combustion": "TRADITIONAL",
             "namakshara": "TRADITIONAL table on the CALCULATED Moon pada",
+            "shanti": sh["status"],
+            "nature": nat["status"],
         },
     }
 
