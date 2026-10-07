@@ -1229,7 +1229,7 @@ function renderPanchanga(r) {
         <div class="moon-body">${moonSVG(ti.index || 1, 76, elong)}<div><b>${esc(tr("paksha", r.lunar_month.paksha))} ${t("Paksha")}</b><div>${esc(trTithi(r.tithi[0].paksha, r.tithi[0].name))}</div><small>Illumination ${illum.toFixed(1)}% \u00b7 elongation ${elong.toFixed(1)}\u00b0</small></div></div>
       </div>
       ${r.moudhya ? `<div class="card"><div class="card-head"><h3>Moudhyami</h3><span class="hint">Guru &amp; Shukra combustion</span></div>${moudhyaRows(r.moudhya)}</div>` : ""}
-      ${r.namakshara && r.namakshara.length ? `<div class="card"><div class="card-head"><h3>Name letters</h3><span class="hint">for babies born this day</span></div>${namaRows(r.namakshara, nowLocalIso(r.tz_minutes), r.date)}<p class="hint">Moon's nakshatra pada from sunrise to the next sunrise; each pada gives the first syllable of the name.</p></div>` : ""}
+      ${r.namakshara && r.namakshara.length ? `<div class="card"><div class="card-head"><h3>Name letters</h3><a class="link" href="#nakshatras" data-tab-link="nakshatras">Padas, gana &amp; more</a></div>${namaRows(r.namakshara, nowLocalIso(r.tz_minutes), r.date)}<p class="hint">Moon's nakshatra pada from sunrise to the next sunrise; each pada gives the first syllable of the name.</p></div>` : ""}
       ${r.shanti_windows ? `<div class="card"><div class="card-head"><h3>Shanti windows</h3><span class="hint">a birth in these times calls for shanti</span></div>${shantiWindows(r.shanti_windows, isToday ? nowLocalIso(r.tz_minutes) : "", r.date)}<p class="hint">Traditional janana dosha rules from sunrise to the next sunrise. Hover a row for the remedy.</p></div>` : ""}
       <div class="card">
         <div class="card-head"><h3>Lunar Month &amp; Festivals</h3></div>

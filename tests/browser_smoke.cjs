@@ -117,6 +117,16 @@ const shots = process.argv[4];
   await shot("panchanga");
   await shot("panchanga_full", true);
 
+  await submit("nakshatras", "nak-form", "#nak-out .nk-tbl", async () => {
+    await page.fill("#nak-form [name=date]", "2026-10-16");
+    await page.selectOption("#nak-form [name=days]", "3");
+  });
+  console.log("nakshatra padas:", await page.$$eval("#nak-out .nk-row", (r) => r.length), "\u00b7 tiles", await page.$$eval("#nak-out .nk-tile", (r) => r.length));
+  await page.click("#nak-out .nk-row");
+  await page.click('#nak-out .nk-chips .chip[data-f="gm"]');
+  await page.click("#nak-out .nk-tile");
+  await shot("nakshatras", true);
+
   await submit("calendar", "cal-form", "#cal-out .cal-cell[data-date]", () => page.fill("#cal-form [name=month]", "2026-10"));
   console.log("calendar moudhya-tagged days:", await page.$$eval("#cal-out .cal-cell .md-tag", (r) => r.length));
   await page.click('#cal-out .cal-cell[data-date="2026-10-24"]');

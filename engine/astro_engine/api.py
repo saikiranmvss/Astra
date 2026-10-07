@@ -373,7 +373,39 @@ def match(p):
     return r
 
 
+def nakshatra_days(p):
+    """Every Moon nakshatra pada from local midnight of `date` for `days` days (1-31)."""
+    from . import nature
+    from .constants import PADA_SPAN
+    from .panchanga import Engine
+    t_start = time.time()
+    y, m, d = _parse_date(p["date"])
+    days = max(1, min(31, int(p.get("days", 1))))
+    tz = float(p.get("tz_minutes", 330))
+    eng = Engine(p.get("ayanamsa", "lahiri"))
+    fmt = lambda j: format_jd(j + tz / 1440.0)
+    t0 = julian_day(y, m, d) - tz / 1440.0
+    raw = []
+    for i in range(days):
+        for gp, a, b in eng.intervals_between(eng.moon_sid, PADA_SPAN, t0 + i, t0 + i + 1, 0.25, 108):
+            if a is not None and a >= t0 + days:
+                continue
+            if any(g == gp and abs((a or 0) - (x or 0)) < 0.05 for g, x, _ in raw):
+                continue
+            raw.append((gp, a, b))
+    raw.sort(key=lambda x: x[1] or 0)
+    padas = [nature.pada_entry(gp, a, b, fmt) for gp, a, b in raw]
+    ey, em, ed = calendar(t0 + tz / 1440.0 + days)[:3]
+    return {"kind": "nakshatras", "date": "%04d-%02d-%02d" % (y, m, d), "days": days,
+            "range": {"start": fmt(t0), "end": fmt(t0 + days)},
+            "padas": padas, "reference": nature.reference(),
+            "status": "CALCULATED Moon pada times; TRADITIONAL gana / pada / Gandamoola tables",
+            "compute_seconds": round(time.time() - t_start, 3)}
+
+
 def dispatch(kind, params):
+    if kind == "nakshatras":
+        return nakshatra_days(params)
     if kind == "chart":
         return birth_chart(params)
     if kind == "panchanga":

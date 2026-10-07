@@ -1143,6 +1143,49 @@ tr.row-danger > td { background: color-mix(in srgb, #ef4444 6%, transparent); }
 .nat-pada-head span { font-size: 12.5px; color: var(--muted); }
 .nat-pada p { margin: 6px 0 4px; font-size: 13.5px; }
 @media (max-width: 560px) { .nat-top { grid-template-columns: 1fr; } .pada-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* nakshatras page */
+.nk-now { display: grid; grid-template-columns: minmax(240px, auto) minmax(0, 1fr); gap: 18px; align-items: center; border-left: 4px solid var(--primary); }
+.nk-now.danger { border-left-color: #dc2626; }
+.nk-now.warn { border-left-color: #ea580c; color: var(--text); }
+.nk-now-main { display: flex; align-items: center; gap: 14px; }
+.nk-now-main .ns { min-width: 62px; height: 62px; font-size: 26px; border-radius: 16px; background: var(--grad); color: #fff; }
+.nk-now-main small, .nk-now-facts small { display: block; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); }
+.nk-now-main b { display: block; font-size: 19px; margin: 2px 0; }
+.nk-now-main em { font-style: normal; font-size: 12.5px; color: var(--text-2); }
+.nk-now-facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+.nk-now-facts > div { padding: 9px 11px; border-radius: 10px; background: var(--bg-2); min-width: 0; }
+.nk-now-facts b { display: block; font-size: 14px; margin-top: 2px; }
+.nk-now-facts b.ok { color: var(--good); }
+.nk-now-facts .hint { display: block; font-size: 11.5px; }
+.nk-tbl td { vertical-align: middle; }
+.nk-row { cursor: pointer; }
+.nk-row:hover > td { background: var(--primary-soft); }
+.nk-row.on > td { background: color-mix(in srgb, var(--primary) 9%, transparent); }
+.nk-row.on > td:first-child { box-shadow: inset 3px 0 0 var(--primary); }
+.nk-day th { background: var(--bg-2); text-transform: none; letter-spacing: 0; font-size: 12.5px; color: var(--text); }
+.nk-syl { display: inline-grid; place-items: center; min-width: 34px; height: 26px; padding: 0 6px; border-radius: 8px; background: var(--primary-soft); color: var(--primary); font-weight: 700; }
+.nk-span { white-space: nowrap; }
+.nk-d { color: var(--muted); font-size: 12px; }
+.nk-eff { display: block; font-size: 11.5px; color: var(--muted); margin-top: 2px; }
+.now-tag { font-style: normal; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: #fff; background: var(--primary); padding: 1px 6px; border-radius: 99px; margin-left: 4px; }
+.nk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 8px; }
+.nk-tile { position: relative; display: block; text-align: left; padding: 10px 12px 10px 38px; border-radius: 11px; border: 1px solid var(--line-3); background: var(--bg-2); color: var(--text); font: inherit; cursor: pointer; border-left: 3px solid var(--line-2); }
+.nk-tile.deva { border-left-color: #22c55e; }
+.nk-tile.manushya { border-left-color: var(--primary); }
+.nk-tile.rakshasa { border-left-color: #f97316; }
+.nk-tile:hover { background: var(--primary-soft); }
+.nk-tile.sel { border-color: var(--primary); box-shadow: 0 0 0 1px var(--primary); background: var(--card); }
+.nk-tile b { display: block; font-size: 13.5px; }
+.nk-tile small { display: block; font-size: 11.5px; color: var(--muted); }
+.nk-i { position: absolute; left: 10px; top: 11px; font-size: 11px; font-weight: 700; color: var(--muted); }
+.nk-gm { position: absolute; right: 8px; top: 8px; font-style: normal; font-size: 9px; font-weight: 800; color: #c2410c; background: #ffedd5; padding: 1px 5px; border-radius: 4px; }
+[data-theme="dark"] .nk-gm { background: rgba(251, 146, 60, .15); color: #fdba74; }
+.nk-detail { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line-3); }
+.pd-sh { display: block; margin-top: 4px; font-style: normal; font-weight: 600; font-size: 11.5px; }
+.pd.danger .pd-sh { color: var(--bad); }
+.pd.warn .pd-sh { color: var(--warn); }
+.pd.info .pd-sh { color: var(--good); }
+@media (max-width: 760px) { .nk-now { grid-template-columns: 1fr; } }
 .cal-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; vertical-align: 1px; }
 .cal-dot.danger { background: #dc2626; }
 .cal-dot.warn { background: #ea580c; }

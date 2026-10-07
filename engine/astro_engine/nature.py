@@ -118,6 +118,40 @@ def of_nakshatra(nak, sign=None, deg=None):
     return out
 
 
+def _shanti_of(nak, pada):
+    from .shanti import gm_pada
+    g = gm_pada(nak, pada)
+    return {"level": g[0], "effect": g[1], "junction": g[2]} if g else None
+
+
+def pada_entry(gp, start, end, fmt):
+    """One timed pada with its syllable, nakshatra nature, pada nature and Gandamoola effect."""
+    from . import namakshara
+    nak, pada = divmod(gp % 108, 4)
+    pada += 1
+    n = of_nakshatra(nak)
+    syl = namakshara.of_index(gp)
+    return {
+        "nakshatra": n["nakshatra"], "nakshatra_index": nak + 1, "pada": pada,
+        "start": fmt(start) if start is not None else None, "end": fmt(end) if end is not None else None,
+        "syllable": {k: syl[k] for k in ("latin", "devanagari", "telugu")},
+        "gana": n["gana"]["name"], "gati": n["gati"]["name"], "yoni": n["yoni"], "lord": n["lord"],
+        "deity": n["deity"], "nadi": n["nadi"], "pada_nature": of_pada(nak, pada),
+        "shanti": _shanti_of(nak, pada),
+    }
+
+
+def reference():
+    """All 27 nakshatras with their nature and the four padas."""
+    out = []
+    for k in range(27):
+        n = of_nakshatra(k)
+        n["index"] = k + 1
+        n["padas"] = [dict(of_pada(k, p), shanti=_shanti_of(k, p)) for p in (1, 2, 3, 4)]
+        out.append(n)
+    return out
+
+
 def for_moon(moon_lon):
     lon = moon_lon % 360.0
     nak = int(lon // NAK_SPAN) % 27

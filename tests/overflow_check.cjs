@@ -6,7 +6,7 @@ const { chromium } = require(path.join(process.argv[2], "playwright-core"));
 const url = process.argv[3], shots = process.argv[4];
 const widths = (process.argv[5] || "390,768").split(",").map(Number);
 
-const TABS = ["dashboard", "chart", "dashas", "transits", "panchanga", "calendar", "festivals", "search", "muhurta", "vargas", "yogas", "match", "eclipses", "reports", "profiles", "settings", "method"];
+const TABS = ["dashboard", "chart", "dashas", "transits", "panchanga", "nakshatras", "calendar", "festivals", "search", "muhurta", "vargas", "yogas", "match", "eclipses", "reports", "profiles", "settings", "method"];
 
 (async () => {
   const browser = await chromium.launch({ channel: "msedge", headless: true });
